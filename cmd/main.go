@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bufio"
+	"os"
 	"shellspy"
 )
 
 func main() {
-	shellspy.CommandFromString(input)
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	shellspy.CommandFromString(text)
 }

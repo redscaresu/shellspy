@@ -1,21 +1,18 @@
 package shellspy_test
 
 import (
+	"os/exec"
 	"shellspy"
 	"testing"
 )
 
 func TestCommandFromString(t *testing.T) {
-	cmd := "hello world"
-	got, err := shellspy.CommandFromString(cmd)
+	got, err := shellspy.CommandFromString("echo hello world")
 	if err != nil {
 		t.Fatal()
 	}
 
-	want, err := shellspy.CommandFromString("hello world")
-	if err != nil {
-		t.Fatal()
-	}
+	want := exec.Command("echo", "hello world")
 
 	if want != got {
 		t.Fatal("want not equal to got")
