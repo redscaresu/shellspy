@@ -4,10 +4,18 @@ import (
 	"bufio"
 	"os"
 	"shellspy"
+	"strings"
 )
 
 func main() {
-	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
-	shellspy.CommandFromString(text)
+
+	for {
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		shellspy.CommandFromString(input)
+
+		if strings.HasPrefix(input, "exit") {
+			os.Exit(0)
+		}
+	}
 }
