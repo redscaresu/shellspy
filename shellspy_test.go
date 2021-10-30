@@ -13,12 +13,21 @@ func TestCommandFromString(t *testing.T) {
 
 	for _, v := range testStrings {
 
-		want := fmt.Sprint(exec.Command(v))
-		fromApp, _ := shellspy.CommandFromString(v)
-		got := fmt.Sprint(fromApp)
+		wantString := fmt.Sprint(exec.Command(v))
+		got, _ := shellspy.CommandFromString(v)
+		gotString := fmt.Sprint(got)
 
-		if want != got {
+		if wantString != gotString {
 			t.Fatal("want not equal to got")
 		}
+	}
+}
+
+func TestRunCommand(t *testing.T) {
+
+	cmd := exec.Command("echo")
+	err := shellspy.RunFromCmd(cmd)
+	if err != nil {
+		t.Fatal("something gone wrong")
 	}
 }
