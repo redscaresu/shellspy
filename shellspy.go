@@ -4,10 +4,15 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func CommandFromString(input string) (*exec.Cmd, error) {
-	cmd := exec.Command(input)
+	trim := strings.TrimSuffix(input, "\n")
+	name := strings.Fields(trim)
+	args := name[1:]
+	join := strings.Join(args, "")
+	cmd := exec.Command(name[0], join)
 	return cmd, nil
 }
 
