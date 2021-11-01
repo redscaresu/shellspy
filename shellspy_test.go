@@ -25,9 +25,14 @@ func TestCommandFromString(t *testing.T) {
 
 func TestRunCommand(t *testing.T) {
 
-	cmd := exec.Command("echo")
-	err := shellspy.RunFromCmd(cmd)
-	if err != nil {
+	want := "hello world"
+	cmd := exec.Command("echo hello world")
+	got, stdErr := shellspy.RunFromCmd(cmd)
+	if stdErr != "<nil>" {
 		t.Fatal("something gone wrong")
 	}
+	if want != got {
+		t.Fatal("something gone wrong")
+	}
+
 }
