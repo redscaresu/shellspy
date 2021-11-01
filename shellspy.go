@@ -1,6 +1,7 @@
 package shellspy
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -16,13 +17,17 @@ func CommandFromString(input string) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-func RunFromCmd(cmd *exec.Cmd) error {
+func RunFromCmd(cmd *exec.Cmd) (string, string) {
+	var outb, errb bytes.Buffer
+	cmd.Stdout = &outb
+	cmd.Stderr = &errb
 
 	err := cmd.Run()
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "an error has occured, %v\n", err)
 		os.Exit(2)
 	}
-	return err
+	stdOut := outb.String()
+	stdErr := errb.String()
+	return stdOut, stdErr
 }
