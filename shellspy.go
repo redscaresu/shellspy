@@ -11,7 +11,8 @@ func CommandFromString(input string) (*exec.Cmd, error) {
 	trim := strings.TrimSuffix(input, "\n")
 	name := strings.Fields(trim)
 	args := name[1:]
-	join := strings.Join(args, "")
+	join := strings.Join(args, " ")
+	fmt.Println(join)
 	cmd := exec.Command(name[0], join)
 	return cmd, nil
 }
