@@ -12,7 +12,6 @@ func CommandFromString(input string) (*exec.Cmd, error) {
 	name := strings.Fields(trim)
 	args := name[1:]
 	join := strings.Join(args, " ")
-	fmt.Println(join)
 	cmd := exec.Command(name[0], join)
 	return cmd, nil
 }
