@@ -28,5 +28,4 @@ func TestRunCommand(t *testing.T) {
 	if want != got {
 		t.Fatal("something gone wrong")
 	}
-
 }
