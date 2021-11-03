@@ -18,7 +18,8 @@ func main() {
 			os.Exit(0)
 		}
 
-		stdOut, _ := shellspy.RunFromCmd(cmd)
+		stdOut, stdErr := shellspy.RunFromCmd(cmd)
 		fmt.Println(stdOut)
+		fmt.Println(stdErr)
 	}
 }

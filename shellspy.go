@@ -2,7 +2,7 @@ package shellspy
 
 import (
 	"bytes"
-	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -14,7 +14,6 @@ func CommandFromString(input string) (*exec.Cmd, error) {
 	args := name[1:]
 	join := strings.Join(args, " ")
 	cmd := exec.Command(name[0], join)
-	// fmt.Println(cmd)
 	return cmd, nil
 }
 
@@ -23,12 +22,24 @@ func RunFromCmd(cmd *exec.Cmd) (string, string) {
 	cmd.Stdout = &outb
 	cmd.Stderr = &errb
 
-	err := cmd.Run()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "an error has occured, %v\n", err)
-		os.Exit(2)
-	}
+	cmd.Run()
+
 	stdOut := outb.String()
 	stdErr := errb.String()
+
 	return stdOut, stdErr
+}
+
+func WriteTranscript(stdOut string) os.File {
+
+	file, err := os.Create("transcript.txt")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer file.Close()
+	file.WriteString(stdOut)
+
+	return *file
 }
