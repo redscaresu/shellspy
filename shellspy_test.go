@@ -1,6 +1,7 @@
 package shellspy_test
 
 import (
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"shellspy"
@@ -39,13 +40,27 @@ func TestWriteShellScript(t *testing.T) {
 	}
 	defer file.Close()
 
-	want := file
-	got := shellspy.WriteTranscript("hello world/n")
-
-	if *want != got {
-		t.Fatal("something gone wrong")
+	s, err := ioutil.ReadFile(file.Name())
+	if err != nil {
+		t.Fatal("something has gone wrong!")
 	}
+	want := string(s)
 
-	os.Remove("transcript.txt")
+	testString := `echo "hello world"
+hello world
+ls testdata/
+transcript.txt
+`
 
+	writeFile := shellspy.WriteTranscript(testString)
+
+	p, err := ioutil.ReadFile(writeFile.Name())
+	if err != nil {
+		t.Fatal("something has gone wrong!")
+	}
+	got := string(p)
+
+	if want != got {
+		t.Fatal("something has gone wrong!")
+	}
 }
