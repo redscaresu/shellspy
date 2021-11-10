@@ -32,14 +32,16 @@ func RunFromCmd(cmd *exec.Cmd) (string, string) {
 
 func WriteTranscript(stdOut string) os.File {
 
-	file, err := os.Create("transcript.txt")
-
+	file, err := os.OpenFile("transcript.txt",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	defer file.Close()
-	file.WriteString(stdOut)
+	if _, err := file.WriteString(stdOut); err != nil {
+		log.Println(err)
+	}
 
 	return *file
 }
