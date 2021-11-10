@@ -1,7 +1,4 @@
-ls -la testdata/
-ls -la testdata/
-ls testdata
-transcript.txt
+echo "hello world"
+hello world
 ls testdata/
 transcript.txt
-exit
