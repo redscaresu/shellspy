@@ -1,7 +1,6 @@
 package shellspy_test
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -61,9 +60,6 @@ transcript.txt
 		t.Fatal("something has gone wrong!")
 	}
 	got := string(p)
-
-	fmt.Println(want)
-	fmt.Println(got)
 
 	if want != got {
 		t.Fatal("something has gone wrong!")

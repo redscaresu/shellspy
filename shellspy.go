@@ -1,12 +1,32 @@
 package shellspy
 
 import (
+	"bufio"
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
 )
+
+func RunCli() {
+	os.Remove("transcript.txt")
+
+	for {
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		WriteTranscript(input)
+		cmd, _ := CommandFromString(input)
+		if strings.HasPrefix(input, "exit") {
+			os.Exit(0)
+		}
+
+		stdOut, _ := RunFromCmd(cmd)
+		WriteTranscript(stdOut)
+		fmt.Println(stdOut)
+	}
+}
 
 func CommandFromString(input string) (*exec.Cmd, error) {
 	trim := strings.TrimSuffix(input, "\n")
