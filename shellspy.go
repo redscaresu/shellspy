@@ -11,7 +11,7 @@ import (
 )
 
 func RunCli() {
-	os.Remove("transcript.txt")
+	os.Remove("shellspy.txt")
 
 	for {
 		reader := bufio.NewReader(os.Stdin)
@@ -52,7 +52,7 @@ func RunFromCmd(cmd *exec.Cmd) (string, string) {
 
 func WriteTranscript(stdOut string) os.File {
 
-	file, err := os.OpenFile("transcript.txt",
+	file, err := os.OpenFile("shellspy.txt",
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println(err)

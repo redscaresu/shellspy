@@ -34,8 +34,8 @@ func TestRunCommand(t *testing.T) {
 
 func TestWriteShellScript(t *testing.T) {
 
-	os.Remove("transcript.txt")
-	file, err := os.Open("testdata/transcript.txt")
+	os.Remove("shellspy.txt")
+	file, err := os.Open("testdata/shellspy.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestWriteShellScript(t *testing.T) {
 	testString := `echo "hello world"
 hello world
 ls testdata/
-transcript.txt
+shellspy.txt
 `
 
 	writeFile := shellspy.WriteTranscript(testString)
