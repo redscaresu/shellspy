@@ -27,7 +27,7 @@ func RunCli() {
 	}
 }
 
-func RunServer(c net.Conn, input string) {
+func RunServer(input string) {
 
 	cmd, _ := CommandFromString(input)
 	if strings.HasPrefix(input, "exit") {
@@ -42,7 +42,7 @@ func RunServer(c net.Conn, input string) {
 func handleConn(c net.Conn) {
 	input := bufio.NewScanner(c)
 	for input.Scan() {
-		RunServer(c, input.Text())
+		RunServer(input.Text())
 	}
 	// NOTE: ignoring potential errors from input.Err()
 	c.Close()
