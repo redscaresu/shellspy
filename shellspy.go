@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,20 +13,39 @@ import (
 
 func RunCli() {
 	os.Remove("shellspy.txt")
-
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		input, _ := reader.ReadString('\n')
-		WriteTranscript(input)
-		cmd, _ := CommandFromString(input)
-		if strings.HasPrefix(input, "exit") {
-			os.Exit(0)
-		}
-
-		stdOut, _ := RunFromCmd(cmd)
-		WriteTranscript(stdOut)
-		fmt.Println(stdOut)
+	listener, err := net.Listen("tcp", "localhost:31359")
+	if err != nil {
+		log.Fatal(err)
 	}
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Print(err)
+			continue
+		}
+		go handleConn(conn)
+	}
+}
+
+func RunServer(c net.Conn, input string) {
+
+	cmd, _ := CommandFromString(input)
+	if strings.HasPrefix(input, "exit") {
+		os.Exit(0)
+	}
+
+	stdOut, _ := RunFromCmd(cmd)
+	WriteTranscript(stdOut)
+	fmt.Println(stdOut)
+}
+
+func handleConn(c net.Conn) {
+	input := bufio.NewScanner(c)
+	for input.Scan() {
+		RunServer(c, input.Text())
+	}
+	// NOTE: ignoring potential errors from input.Err()
+	c.Close()
 }
 
 func CommandFromString(input string) (*exec.Cmd, error) {
