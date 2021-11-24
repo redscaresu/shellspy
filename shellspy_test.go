@@ -34,7 +34,6 @@ func TestRunCommand(t *testing.T) {
 
 func TestWriteShellScript(t *testing.T) {
 
-	os.Remove("shellspy.txt")
 	file, err := os.Open("testdata/shellspy.txt")
 	if err != nil {
 		t.Fatal(err)
