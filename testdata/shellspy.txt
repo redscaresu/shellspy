@@ -1,4 +1,4 @@
 echo "hello world"
 hello world
 ls testdata/
-transcript.txt
+shellspy.txt

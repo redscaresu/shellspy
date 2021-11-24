@@ -1,6 +1,7 @@
 package shellspy_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -34,6 +35,10 @@ func TestRunCommand(t *testing.T) {
 
 func TestWriteShellScript(t *testing.T) {
 
+	if _, err := os.Stat("shellspy.txt"); err == nil {
+		os.Remove("shellspy.txt")
+	}
+
 	file, err := os.Open("testdata/shellspy.txt")
 	if err != nil {
 		t.Fatal(err)
@@ -61,6 +66,8 @@ shellspy.txt
 	got := string(p)
 
 	if want != got {
+		fmt.Println(want)
+		fmt.Println(got)
 		t.Fatal("something has gone wrong!")
 	}
 }
