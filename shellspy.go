@@ -38,7 +38,7 @@ func RunServer(input string) {
 		os.Exit(0)
 	}
 
-	stdOut, _ := RunFromCmd(cmd)
+	stdOut := RunFromCmd(cmd)
 	WriteTranscript(stdOut)
 	fmt.Println(stdOut)
 }
@@ -61,17 +61,15 @@ func CommandFromString(input string) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-func RunFromCmd(cmd *exec.Cmd) (string, string) {
-	var outb, errb bytes.Buffer
+func RunFromCmd(cmd *exec.Cmd) string {
+	var outb bytes.Buffer
 	cmd.Stdout = &outb
-	cmd.Stderr = &errb
 
 	cmd.Run()
 
 	stdOut := outb.String()
-	stdErr := errb.String()
 
-	return stdOut, stdErr
+	return stdOut
 }
 
 func WriteTranscript(stdOut string) os.File {

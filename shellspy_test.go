@@ -26,7 +26,7 @@ func TestRunCommand(t *testing.T) {
 
 	want := "hello world\n"
 	cmd := exec.Command("echo", "hello world")
-	got, _ := shellspy.RunFromCmd(cmd)
+	got := shellspy.RunFromCmd(cmd)
 
 	if want != got {
 		t.Fatal("something gone wrong")
