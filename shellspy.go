@@ -29,7 +29,11 @@ func RunCli() {
 
 func RunServer(input string) {
 
-	cmd, _ := CommandFromString(input)
+	cmd, err := CommandFromString(input)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	if strings.HasPrefix(input, "exit") {
 		os.Exit(0)
 	}
