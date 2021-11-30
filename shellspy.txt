@@ -1,4 +1,1 @@
-echo "hello world"
-hello world
-ls testdata/
-shellspy.txt
+hello

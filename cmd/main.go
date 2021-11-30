@@ -6,5 +6,5 @@ import (
 
 func main() {
 
-	shellspy.RunCli()
+	shellspy.RunCLI()
 }

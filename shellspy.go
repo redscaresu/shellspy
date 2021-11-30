@@ -11,9 +11,17 @@ import (
 	"strings"
 )
 
-func RunCli() {
+func RunCLI() {
+
+	if len(os.Args) == 1 {
+		fmt.Fprintf(os.Stderr, "missing PORT arg\n")
+		os.Exit(1)
+	}
+
 	os.Remove("shellspy.txt")
-	listener, err := net.Listen("tcp", "localhost:31359")
+	address := "localhost:" + os.Args[1]
+
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +56,6 @@ func handleConn(c net.Conn) {
 	for input.Scan() {
 		RunServer(input.Text())
 	}
-	// NOTE: ignoring potential errors from input.Err()
 	c.Close()
 }
 
