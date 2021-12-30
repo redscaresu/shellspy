@@ -1,0 +1,7 @@
+- sort out client auth on program
+- what if i want to use locally not remotely, if you supply a port number work remotely otherwise work locally
+- prompt for shellsput to report that its running via a welcome or something like that.
+- report the command not just standard out, record everything not just standard out
+- customise name of the shellspy recording file, what happens if it already exists? create a new one if already there.
+- fix test TestWriteShellScript
+- make sure output ends up in session.output

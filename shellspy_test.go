@@ -1,13 +1,41 @@
 package shellspy_test
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"shellspy"
+	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
+
+func TestInput(t *testing.T) {
+
+	input := strings.NewReader("echo hello world")
+	want := "hello world"
+
+	// var writer *bytes.Buffer
+	// foo := bytes.Buffer{}
+	// writer = &foo
+
+	writer := &bytes.Buffer{}
+
+	session := shellspy.NewSession() //returns a struct
+	session.Input = input
+	session.Output = writer
+	session.Run()
+
+	got := writer.String()
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+
+}
 
 func TestCommandFromString(t *testing.T) {
 
@@ -24,6 +52,8 @@ func TestCommandFromString(t *testing.T) {
 
 func TestRunCommand(t *testing.T) {
 
+	// var want bytes.Buffer
+	// want.WriteString("hello world\n")
 	want := "hello world\n"
 	cmd := exec.Command("echo", "hello world")
 	got := shellspy.RunFromCmd(cmd)

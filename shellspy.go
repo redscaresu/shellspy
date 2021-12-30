@@ -4,12 +4,18 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
 	"os/exec"
 	"strings"
 )
+
+type session struct {
+	Input  io.Reader
+	Output io.Writer
+}
 
 func RunCLI() {
 
@@ -35,7 +41,7 @@ func RunCLI() {
 	}
 }
 
-func RunServer(input string) {
+func RunServer(input string) io.Writer {
 
 	cmd, err := CommandFromString(input)
 	if err != nil {
@@ -48,10 +54,11 @@ func RunServer(input string) {
 
 	stdOut := RunFromCmd(cmd)
 	WriteTranscript(stdOut)
-	fmt.Println(stdOut)
+	return stdOut
 }
 
 func handleConn(c net.Conn) {
+
 	input := bufio.NewScanner(c)
 	for input.Scan() {
 		RunServer(input.Text())
@@ -68,18 +75,18 @@ func CommandFromString(input string) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-func RunFromCmd(cmd *exec.Cmd) string {
+func RunFromCmd(cmd *exec.Cmd) io.Writer {
 	var outb bytes.Buffer
 	cmd.Stdout = &outb
 
 	cmd.Run()
 
-	stdOut := outb.String()
+	// stdOut := outb.String()
 
-	return stdOut
+	return cmd.Stdout
 }
 
-func WriteTranscript(stdOut string) os.File {
+func WriteTranscript(stdOut io.Writer) os.File {
 
 	file, err := os.OpenFile("shellspy.txt",
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -88,9 +95,29 @@ func WriteTranscript(stdOut string) os.File {
 	}
 
 	defer file.Close()
-	if _, err := file.WriteString(stdOut); err != nil {
+
+	var buffer bytes.Buffer
+	_, err = buffer.WriteTo(stdOut)
+	if err != nil {
+		fmt.Println("shit")
+	}
+
+	if _, err := file.WriteString(buffer.String()); err != nil {
 		log.Println(err)
 	}
 
 	return *file
+}
+
+func NewSession() session {
+	return session{}
+}
+
+func (s *session) Run() {
+
+	scanner := bufio.NewScanner(s.Input)
+	for scanner.Scan() {
+		s.Output = RunServer(scanner.Text())
+		fmt.Println(s.Output)
+	}
 }
