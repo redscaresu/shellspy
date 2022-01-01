@@ -2,7 +2,7 @@ package shellspy_test
 
 import (
 	"bytes"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -16,20 +16,21 @@ import (
 func TestInput(t *testing.T) {
 
 	input := strings.NewReader("echo hello world")
-	want := "hello world"
+	want := "hello world\n"
 
 	// var writer *bytes.Buffer
 	// foo := bytes.Buffer{}
 	// writer = &foo
 
-	writer := &bytes.Buffer{}
+	// writer := &bytes.Buffer{}
+	writer := ""
 
 	session := shellspy.NewSession() //returns a struct
 	session.Input = input
 	session.Output = writer
 	session.Run()
 
-	got := writer.String()
+	got := session.Output
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
@@ -54,12 +55,15 @@ func TestRunCommand(t *testing.T) {
 
 	// var want bytes.Buffer
 	// want.WriteString("hello world\n")
-	want := "hello world\n"
+	// writer := &bytes.Buffer{}
+
+	// io.WriteString(writer, "hello world\n")
 	cmd := exec.Command("echo", "hello world")
+	want := "hello world\n"
 	got := shellspy.RunFromCmd(cmd)
 
-	if want != got {
-		t.Fatal("something gone wrong")
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
 	}
 }
 
@@ -81,13 +85,20 @@ func TestWriteShellScript(t *testing.T) {
 	}
 	want := string(s)
 
-	testString := `echo "hello world"
+	writer := &bytes.Buffer{}
+	io.WriteString(writer, `echo "hello world"
 hello world
 ls testdata/
 shellspy.txt
-`
+`)
 
-	writeFile := shellspy.WriteTranscript(testString)
+	// 	testString := `echo "hello world"
+	// hello world
+	// ls testdata/
+	// shellspy.txt
+	// `
+
+	writeFile := shellspy.WriteTranscript(writer.String())
 
 	p, err := ioutil.ReadFile(writeFile.Name())
 	if err != nil {
@@ -95,9 +106,7 @@ shellspy.txt
 	}
 	got := string(p)
 
-	if want != got {
-		fmt.Println(want)
-		fmt.Println(got)
-		t.Fatal("something has gone wrong!")
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(writer, got))
 	}
 }
