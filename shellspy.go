@@ -41,6 +41,18 @@ func RunCLI() {
 	}
 }
 
+func NewSession() session {
+	return session{}
+}
+
+func (s *session) Run() {
+
+	scanner := bufio.NewScanner(s.Input)
+	for scanner.Scan() {
+		s.Output = RunServer(scanner.Text())
+	}
+}
+
 func RunServer(input string) string {
 
 	cmd, err := CommandFromString(input)
@@ -100,16 +112,4 @@ func WriteTranscript(stdOut string) os.File {
 	}
 
 	return *file
-}
-
-func NewSession() session {
-	return session{}
-}
-
-func (s *session) Run() {
-
-	scanner := bufio.NewScanner(s.Input)
-	for scanner.Scan() {
-		s.Output = RunServer(scanner.Text())
-	}
 }
