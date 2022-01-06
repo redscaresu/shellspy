@@ -20,6 +20,7 @@ type session struct {
 func RunCLI() {
 
 	if len(os.Args) == 1 {
+		fmt.Printf("shellspy is running locally\n")
 
 		input := bufio.NewScanner(os.Stdin)
 		for input.Scan() {
@@ -28,6 +29,8 @@ func RunCLI() {
 			s.Run()
 		}
 	}
+
+	fmt.Printf("shellspy is running remotely on port %v\n", os.Args[1])
 
 	os.Remove("shellspy.txt")
 	address := "localhost:" + os.Args[1]
