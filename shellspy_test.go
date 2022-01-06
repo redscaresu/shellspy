@@ -109,4 +109,5 @@ shellspy.txt
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(writer, got))
 	}
+	os.Remove("shellspy.txt")
 }
