@@ -20,8 +20,13 @@ type session struct {
 func RunCLI() {
 
 	if len(os.Args) == 1 {
-		fmt.Fprintf(os.Stderr, "missing PORT arg\n")
-		os.Exit(1)
+
+		input := bufio.NewScanner(os.Stdin)
+		for input.Scan() {
+			s := NewSession()
+			s.Input = strings.NewReader(input.Text())
+			s.Run()
+		}
 	}
 
 	os.Remove("shellspy.txt")
