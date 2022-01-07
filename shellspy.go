@@ -96,17 +96,21 @@ func CommandFromString(input string) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-func RunFromCmd(cmd *exec.Cmd) string {
+func RunFromCmd(cmd *exec.Cmd) (string, string) {
 	var outb bytes.Buffer
+	var errb bytes.Buffer
 	cmd.Stdout = &outb
+	cmd.Stderr = &errb
 
 	cmd.Run()
 
 	stdOut := outb.String()
-	return stdOut
+	stdErr := errb.String()
+
+	return stdOut, stdErr
 }
 
-func WriteTranscript(stdOut string) os.File {
+func WriteTranscript(stdOut, stdErr string) os.File {
 
 	now := time.Now()
 	filename := "shellspy-" + now.Format("2006-01-02-15:04:05") + ".txt"
