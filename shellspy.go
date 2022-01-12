@@ -77,7 +77,7 @@ func RunServer(line string) string {
 	}
 
 	stdOut, stdErr := RunFromCmd(cmd)
-	WriteTranscript(stdOut, stdErr)
+	WriteTranscript(stdOut, stdErr, cmd)
 	return stdOut
 }
 
@@ -113,7 +113,7 @@ func RunFromCmd(cmd *exec.Cmd) (string, string) {
 	return stdOut, stdErr
 }
 
-func WriteTranscript(stdOut, stdErr string) os.File {
+func WriteTranscript(stdOut, stdErr string, cmd *exec.Cmd) os.File {
 
 	now := time.Now()
 	filename := "shellspy-" + now.Format("2006-01-02-15:04:05") + ".txt"
@@ -125,6 +125,9 @@ func WriteTranscript(stdOut, stdErr string) os.File {
 
 	defer file.Close()
 
+	if _, err := file.WriteString(cmd.String()); err != nil {
+		log.Println(err)
+	}
 	if _, err := file.WriteString(stdOut); err != nil {
 		log.Println(err)
 	}
