@@ -14,8 +14,9 @@ import (
 )
 
 type session struct {
-	Input  io.Reader
-	Output string
+	Input            io.Reader
+	Output           io.Writer
+	TranscriptOutput io.Writer
 }
 
 func RunCLI() {
@@ -58,23 +59,25 @@ func (s *session) Run() {
 
 	scanner := bufio.NewScanner(s.Input)
 	for scanner.Scan() {
-		s.Output = RunServer(scanner.Text())
+		foo := RunServer(scanner.Text())
+		fmt.Fprintln(s.Output, foo)
+		fmt.Fprintln(s.TranscriptOutput, foo)
 	}
 }
 
-func RunServer(input string) string {
+func RunServer(line string) string {
 
-	cmd, err := CommandFromString(input)
+	cmd, err := CommandFromString(line)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	if strings.HasPrefix(input, "exit") {
+	if strings.HasPrefix(line, "exit") {
 		os.Exit(0)
 	}
 
-	stdOut := RunFromCmd(cmd)
-	WriteTranscript(stdOut)
+	stdOut, stdErr := RunFromCmd(cmd)
+	WriteTranscript(stdOut, stdErr)
 	return stdOut
 }
 
@@ -87,8 +90,8 @@ func handleConn(c net.Conn) {
 	c.Close()
 }
 
-func CommandFromString(input string) (*exec.Cmd, error) {
-	trim := strings.TrimSuffix(input, "\n")
+func CommandFromString(line string) (*exec.Cmd, error) {
+	trim := strings.TrimSuffix(line, "\n")
 	name := strings.Fields(trim)
 	args := name[1:]
 	join := strings.Join(args, " ")

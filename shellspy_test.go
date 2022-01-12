@@ -2,9 +2,6 @@ package shellspy_test
 
 import (
 	"bytes"
-	"io"
-	"io/ioutil"
-	"os"
 	"os/exec"
 	"shellspy"
 	"strings"
@@ -12,31 +9,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 )
-
-func TestInput(t *testing.T) {
-
-	input := strings.NewReader("echo hello world")
-	want := "hello world\n"
-
-	// var writer *bytes.Buffer
-	// foo := bytes.Buffer{}
-	// writer = &foo
-
-	// writer := &bytes.Buffer{}
-	writer := ""
-
-	session := shellspy.NewSession() //returns a struct
-	session.Input = input
-	session.Output = writer
-	session.Run()
-
-	got := session.Output
-
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-
-}
 
 func TestCommandFromString(t *testing.T) {
 
@@ -60,7 +32,7 @@ func TestRunCommand(t *testing.T) {
 	// io.WriteString(writer, "hello world\n")
 	cmd := exec.Command("echo", "hello world")
 	want := "hello world\n"
-	got := shellspy.RunFromCmd(cmd)
+	got, _ := shellspy.RunFromCmd(cmd)
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
@@ -69,45 +41,20 @@ func TestRunCommand(t *testing.T) {
 
 func TestWriteShellScript(t *testing.T) {
 
-	if _, err := os.Stat("shellspy.txt"); err == nil {
-		os.Remove("shellspy.txt")
-	}
-
-	file, err := os.Open("testdata/shellspy.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer file.Close()
-
-	s, err := ioutil.ReadFile(file.Name())
-	if err != nil {
-		t.Fatal("something has gone wrong!")
-	}
-	want := string(s)
+	want := "echo hello world\nhello world"
 
 	writer := &bytes.Buffer{}
-	io.WriteString(writer, `echo "hello world"
-hello world
-ls testdata/
-shellspy.txt
-`)
+	twriter := &bytes.Buffer{}
 
-	// 	testString := `echo "hello world"
-	// hello world
-	// ls testdata/
-	// shellspy.txt
-	// `
+	session := shellspy.NewSession()
+	session.Input = strings.NewReader("echo hello world")
+	session.Output = writer
+	session.TranscriptOutput = twriter
+	session.Run()
 
-	writeFile := shellspy.WriteTranscript(writer.String())
-
-	p, err := ioutil.ReadFile(writeFile.Name())
-	if err != nil {
-		t.Fatal("something has gone wrong!")
-	}
-	got := string(p)
+	got := twriter.String()
 
 	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(writer, got))
+		t.Error(cmp.Diff(want, got))
 	}
-	os.Remove("shellspy.txt")
 }
