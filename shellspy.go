@@ -59,9 +59,9 @@ func (s *session) Run() {
 
 	scanner := bufio.NewScanner(s.Input)
 	for scanner.Scan() {
-		foo := RunServer(scanner.Text())
-		fmt.Fprintln(s.Output, foo)
-		fmt.Fprintln(s.TranscriptOutput, foo)
+		stdOut := RunServer(scanner.Text())
+		fmt.Fprintln(s.Output, stdOut)
+		fmt.Fprintln(s.TranscriptOutput, stdOut)
 	}
 }
 
