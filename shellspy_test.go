@@ -26,11 +26,6 @@ func TestCommandFromString(t *testing.T) {
 
 func TestRunCommand(t *testing.T) {
 
-	// var want bytes.Buffer
-	// want.WriteString("hello world\n")
-	// writer := &bytes.Buffer{}
-
-	// io.WriteString(writer, "hello world\n")
 	cmd := exec.Command("echo", "hello world")
 	want := "hello world\n"
 	got, _ := shellspy.RunFromCmd(cmd)
@@ -41,12 +36,6 @@ func TestRunCommand(t *testing.T) {
 }
 
 func TestWriteShellScript(t *testing.T) {
-
-	// twriter := &bytes.Buffer{}
-	// stdOut := "hello world\n"
-	// wantSession := shellspy.NewSession()
-	// wantSession.TranscriptOutput = twriter
-	// fmt.Fprintln(twriter, stdOut)
 
 	wantBuf := &bytes.Buffer{}
 	gotBuf := &bytes.Buffer{}
