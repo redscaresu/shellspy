@@ -2,6 +2,7 @@ package shellspy_test
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"shellspy"
 	"strings"
@@ -41,18 +42,23 @@ func TestRunCommand(t *testing.T) {
 
 func TestWriteShellScript(t *testing.T) {
 
-	want := "echo hello world\nhello world"
+	// twriter := &bytes.Buffer{}
+	// stdOut := "hello world\n"
+	// wantSession := shellspy.NewSession()
+	// wantSession.TranscriptOutput = twriter
+	// fmt.Fprintln(twriter, stdOut)
 
-	writer := &bytes.Buffer{}
-	twriter := &bytes.Buffer{}
-
+	wantBuf := &bytes.Buffer{}
+	gotBuf := &bytes.Buffer{}
+	wantBuf.WriteString("hello world\n")
 	session := shellspy.NewSession()
-	session.Input = strings.NewReader("echo hello world")
-	session.Output = writer
-	session.TranscriptOutput = twriter
-	session.Run()
 
-	got := twriter.String()
+	session.Input = strings.NewReader("echo hello world")
+	session.Run()
+	fmt.Fprint(gotBuf, session.TranscriptOutput)
+
+	want := wantBuf.String()
+	got := gotBuf.String()
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))

@@ -57,11 +57,16 @@ func NewSession() session {
 
 func (s *session) Run() {
 
+	writer := &bytes.Buffer{}
+	twriter := &bytes.Buffer{}
+
 	scanner := bufio.NewScanner(s.Input)
 	for scanner.Scan() {
 		stdOut := RunServer(scanner.Text())
-		fmt.Fprintln(s.Output, stdOut)
-		fmt.Fprintln(s.TranscriptOutput, stdOut)
+		s.Output = writer
+		s.TranscriptOutput = twriter
+		fmt.Fprint(writer, stdOut)
+		fmt.Fprint(twriter, stdOut)
 	}
 }
 
