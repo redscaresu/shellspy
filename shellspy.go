@@ -27,15 +27,23 @@ func RunCLI() {
 	s.File = file
 
 	if len(os.Args) == 1 {
-		fmt.Printf("shellspy is running locally\n")
-
-		input := bufio.NewScanner(os.Stdin)
-		for input.Scan() {
-			s.Input = strings.NewReader(input.Text())
-			s.Run()
-		}
+		RunLocally(s)
 	}
+	RunRemotely(s)
+}
 
+func RunLocally(s session) {
+
+	fmt.Printf("shellspy is running locally\n")
+
+	input := bufio.NewScanner(os.Stdin)
+	for input.Scan() {
+		s.Input = strings.NewReader(input.Text())
+		s.Run()
+	}
+}
+
+func RunRemotely(s session) {
 	fmt.Printf("shellspy is running remotely on port %v\n", os.Args[1])
 
 	address := "localhost:" + os.Args[1]

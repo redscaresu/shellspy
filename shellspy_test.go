@@ -20,7 +20,6 @@ func TestCommandFromString(t *testing.T) {
 
 	if want != got.String() {
 		t.Fatal("something gone wrong")
-
 	}
 
 }

@@ -1,5 +1,0 @@
-- report the command not just standard out, record everything not just standard out
-- fix tests
-
-- fix program so that it writes the cmd and the output.
-- refactor real program to use the new things e.g. rewrite so you get things in your transcript file.
