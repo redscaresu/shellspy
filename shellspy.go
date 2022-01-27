@@ -22,16 +22,16 @@ type session struct {
 
 func RunCLI() {
 
+	file := CreateFile()
+	s := NewSession()
+	s.File = file
+
 	if len(os.Args) == 1 {
 		fmt.Printf("shellspy is running locally\n")
-		file := CreateFile()
 
 		input := bufio.NewScanner(os.Stdin)
 		for input.Scan() {
-			s := NewSession()
 			s.Input = strings.NewReader(input.Text())
-			s.File = file
-
 			s.Run()
 		}
 	}
@@ -50,7 +50,7 @@ func RunCLI() {
 			fmt.Print(err)
 			continue
 		}
-		go handleConn(conn)
+		go handleConn(conn, s)
 	}
 }
 
@@ -90,15 +90,14 @@ func RunServer(line string, file *os.File) string {
 	return stdOut
 }
 
-func handleConn(c net.Conn) {
+func handleConn(c net.Conn, s session) {
 
-	file := CreateFile()
 	input := bufio.NewScanner(c)
 	for input.Scan() {
-		RunServer(input.Text(), file)
+		s.Input = strings.NewReader(input.Text())
+		s.Run()
 	}
 	c.Close()
-	file.Close()
 }
 
 func CommandFromString(line string) (*exec.Cmd, error) {
