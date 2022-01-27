@@ -17,24 +17,27 @@ type session struct {
 	Input            io.Reader
 	Output           io.Writer
 	TranscriptOutput io.Writer
+	File             *os.File
 }
 
 func RunCLI() {
 
 	if len(os.Args) == 1 {
 		fmt.Printf("shellspy is running locally\n")
+		file := CreateFile()
 
 		input := bufio.NewScanner(os.Stdin)
 		for input.Scan() {
 			s := NewSession()
 			s.Input = strings.NewReader(input.Text())
+			s.File = file
+
 			s.Run()
 		}
 	}
 
 	fmt.Printf("shellspy is running remotely on port %v\n", os.Args[1])
 
-	os.Remove("shellspy.txt")
 	address := "localhost:" + os.Args[1]
 
 	listener, err := net.Listen("tcp", address)
@@ -62,7 +65,8 @@ func (s *session) Run() {
 
 	scanner := bufio.NewScanner(s.Input)
 	for scanner.Scan() {
-		stdOut := RunServer(scanner.Text())
+		file := s.File
+		stdOut := RunServer(scanner.Text(), file)
 		s.Output = writer
 		s.TranscriptOutput = twriter
 		fmt.Fprint(writer, stdOut)
@@ -70,7 +74,7 @@ func (s *session) Run() {
 	}
 }
 
-func RunServer(line string) string {
+func RunServer(line string, file *os.File) string {
 
 	cmd, err := CommandFromString(line)
 	if err != nil {
@@ -82,17 +86,19 @@ func RunServer(line string) string {
 	}
 
 	stdOut, stdErr := RunFromCmd(cmd)
-	WriteTranscript(stdOut, stdErr, cmd)
+	WriteTranscript(stdOut, stdErr, cmd, file)
 	return stdOut
 }
 
 func handleConn(c net.Conn) {
 
+	file := CreateFile()
 	input := bufio.NewScanner(c)
 	for input.Scan() {
-		RunServer(input.Text())
+		RunServer(input.Text(), file)
 	}
 	c.Close()
+	file.Close()
 }
 
 func CommandFromString(line string) (*exec.Cmd, error) {
@@ -118,8 +124,7 @@ func RunFromCmd(cmd *exec.Cmd) (string, string) {
 	return stdOut, stdErr
 }
 
-func WriteTranscript(stdOut, stdErr string, cmd *exec.Cmd) os.File {
-
+func CreateFile() *os.File {
 	now := time.Now()
 	filename := "shellspy-" + now.Format("2006-01-02-15:04:05") + ".txt"
 	file, err := os.OpenFile(filename,
@@ -127,12 +132,15 @@ func WriteTranscript(stdOut, stdErr string, cmd *exec.Cmd) os.File {
 	if err != nil {
 		log.Println(err)
 	}
+	return file
+}
 
-	defer file.Close()
+func WriteTranscript(stdOut, stdErr string, cmd *exec.Cmd, file *os.File) os.File {
 
 	if _, err := file.WriteString(cmd.String()); err != nil {
 		log.Println(err)
 	}
+	file.WriteString("\n")
 	if _, err := file.WriteString(stdOut); err != nil {
 		log.Println(err)
 	}
