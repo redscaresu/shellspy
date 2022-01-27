@@ -139,7 +139,13 @@ func WriteTranscript(stdOut, stdErr string, cmd *exec.Cmd, file *os.File) os.Fil
 	if _, err := file.WriteString(cmd.String()); err != nil {
 		log.Println(err)
 	}
+
 	file.WriteString("\n")
+
+	if stdErr != "" {
+		file.WriteString(stdErr)
+	}
+
 	if _, err := file.WriteString(stdOut); err != nil {
 		log.Println(err)
 	}
