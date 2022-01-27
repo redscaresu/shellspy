@@ -54,6 +54,16 @@ func RunCLI() {
 	}
 }
 
+func handleConn(c net.Conn, s session) {
+
+	input := bufio.NewScanner(c)
+	for input.Scan() {
+		s.Input = strings.NewReader(input.Text())
+		s.Run()
+	}
+	c.Close()
+}
+
 func NewSession() session {
 	return session{}
 }
@@ -88,16 +98,6 @@ func RunServer(line string, file *os.File) string {
 	stdOut, stdErr := RunFromCmd(cmd)
 	WriteTranscript(stdOut, stdErr, cmd, file)
 	return stdOut
-}
-
-func handleConn(c net.Conn, s session) {
-
-	input := bufio.NewScanner(c)
-	for input.Scan() {
-		s.Input = strings.NewReader(input.Text())
-		s.Run()
-	}
-	c.Close()
 }
 
 func CommandFromString(line string) (*exec.Cmd, error) {

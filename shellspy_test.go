@@ -3,6 +3,7 @@ package shellspy_test
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"shellspy"
 	"strings"
@@ -43,7 +44,9 @@ func TestWriteShellScript(t *testing.T) {
 	session := shellspy.NewSession()
 
 	session.Input = strings.NewReader("echo hello world")
+	session.File = shellspy.CreateFile()
 	session.Run()
+	os.Remove(session.File.Name())
 	fmt.Fprint(gotBuf, session.TranscriptOutput)
 
 	want := wantBuf.String()
