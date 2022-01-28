@@ -35,12 +35,8 @@ func RunCLI() {
 func RunLocally(s session) {
 
 	fmt.Printf("shellspy is running locally\n")
-
 	input := bufio.NewScanner(os.Stdin)
-	for input.Scan() {
-		s.Input = strings.NewReader(input.Text())
-		s.Run()
-	}
+	Input(input, s)
 }
 
 func RunRemotely(s session) {
@@ -65,11 +61,16 @@ func RunRemotely(s session) {
 func handleConn(c net.Conn, s session) {
 
 	input := bufio.NewScanner(c)
+	Input(input, s)
+	c.Close()
+}
+
+func Input(input *bufio.Scanner, s session) {
+
 	for input.Scan() {
 		s.Input = strings.NewReader(input.Text())
 		s.Run()
 	}
-	c.Close()
 }
 
 func NewSession() session {
