@@ -3,12 +3,14 @@ package shellspy
 import (
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -18,6 +20,7 @@ type session struct {
 	Output           io.Writer
 	TranscriptOutput io.Writer
 	File             *os.File
+	Port             int
 }
 
 func RunCLI() {
@@ -26,10 +29,18 @@ func RunCLI() {
 	s := NewSession()
 	s.File = file
 
-	if len(os.Args) == 1 {
+	local := flag.String("mode", "", "set to run locally")
+	port := flag.Int("port", 3000, "port number")
+	flag.Parse()
+
+	if *local == "local" {
 		RunLocally(s)
 	}
-	RunRemotely(s)
+
+	if *local == "" && (*port >= 1 && *port <= 65535) {
+		s.Port = *port
+		RunRemotely(s)
+	}
 }
 
 func RunLocally(s session) {
@@ -40,9 +51,9 @@ func RunLocally(s session) {
 }
 
 func RunRemotely(s session) {
-	fmt.Printf("shellspy is running remotely on port %v\n", os.Args[1])
+	fmt.Printf("shellspy is running remotely on port %v\n", s.Port)
 
-	address := "localhost:" + os.Args[1]
+	address := "localhost:" + strconv.Itoa(s.Port)
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
