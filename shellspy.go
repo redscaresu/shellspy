@@ -44,7 +44,11 @@ func RunCLI() {
 
 	if *local == "" && (*port >= 1 && *port <= 65535) {
 		s.Port = *port
-		RunRemotely(s)
+		err := RunRemotely(s)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
 }
 
@@ -55,7 +59,7 @@ func RunLocally(s session) {
 	Input(input, s)
 }
 
-func RunRemotely(s session) {
+func RunRemotely(s session) error {
 	fmt.Printf("shellspy is running remotely on port %v\n", s.Port)
 
 	address := "localhost:" + strconv.Itoa(s.Port)
@@ -67,8 +71,7 @@ func RunRemotely(s session) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Print(err)
-			continue
+			return err
 		}
 		go handleConn(conn, s)
 	}
