@@ -167,7 +167,8 @@ func CreateFile() (*os.File, error) {
 func WriteTranscript(stdOut, stdErr string, cmd *exec.Cmd, file *os.File) os.File {
 
 	if _, err := file.WriteString(cmd.String()); err != nil {
-		log.Println(err)
+		err = fmt.Errorf("unable to write cmd to disk due to error; %w", err)
+		file.WriteString(err.Error())
 	}
 
 	file.WriteString("\n")
@@ -177,7 +178,8 @@ func WriteTranscript(stdOut, stdErr string, cmd *exec.Cmd, file *os.File) os.Fil
 	}
 
 	if _, err := file.WriteString(stdOut); err != nil {
-		log.Println(err)
+		err = fmt.Errorf("unable to write stdOut to disk due to error; %w", err)
+		file.WriteString(err.Error())
 	}
 
 	return *file
