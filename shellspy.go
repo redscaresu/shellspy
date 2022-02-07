@@ -30,8 +30,13 @@ func RunCLI() {
 	s.File = file
 
 	local := flag.String("mode", "", "set to run locally")
-	port := flag.Int("port", 3000, "port number")
+	port := flag.Int("port", 0, "port number")
 	flag.Parse()
+
+	if *local == "" && (*port == 0) {
+		fmt.Println("Usage: [ --port int | --mode local ]")
+		os.Exit(1)
+	}
 
 	if *local == "local" {
 		RunLocally(s)
