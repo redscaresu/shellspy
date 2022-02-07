@@ -111,11 +111,8 @@ func (s *session) Run() {
 
 func RunServer(line string, file *os.File) string {
 
-	cmd, err := CommandFromString(line)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	cmd := CommandFromString(line)
+
 	if strings.HasPrefix(line, "exit") {
 		os.Exit(0)
 	}
@@ -125,13 +122,13 @@ func RunServer(line string, file *os.File) string {
 	return stdOut
 }
 
-func CommandFromString(line string) (*exec.Cmd, error) {
+func CommandFromString(line string) *exec.Cmd {
 	trim := strings.TrimSuffix(line, "\n")
 	name := strings.Fields(trim)
 	args := name[1:]
 	join := strings.Join(args, " ")
 	cmd := exec.Command(name[0], join)
-	return cmd, nil
+	return cmd
 }
 
 func RunFromCmd(cmd *exec.Cmd) (string, string) {
