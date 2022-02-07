@@ -17,12 +17,11 @@ func TestCommandFromString(t *testing.T) {
 
 	input := "echo hello world\n"
 	want := "/bin/echo hello world"
-	got := shellspy.CommandFromString(input)
+	got := shellspy.CommandFromString(input).String()
 
-	if want != got.String() {
-		t.Fatal("something gone wrong")
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
 	}
-
 }
 
 func TestRunCommand(t *testing.T) {
