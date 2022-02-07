@@ -33,6 +33,15 @@ func TestRunCommand(t *testing.T) {
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
+
+	cmd = exec.Command("pwd", "-x")
+	want = "pwd: illegal option -- x\nusage: pwd [-L | -P]\n"
+
+	_, got = shellspy.RunFromCmd(cmd)
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+
 }
 
 func TestWriteShellScript(t *testing.T) {
