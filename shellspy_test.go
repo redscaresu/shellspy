@@ -16,7 +16,7 @@ func TestCommandFromString(t *testing.T) {
 
 	input := "echo hello world\n"
 	want := "/bin/echo hello world"
-	got, _ := shellspy.CommandFromString(input)
+	got := shellspy.CommandFromString(input)
 
 	if want != got.String() {
 		t.Fatal("something gone wrong")
