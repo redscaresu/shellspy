@@ -25,7 +25,12 @@ type session struct {
 
 func RunCLI() {
 
-	file := CreateFile()
+	file, err := CreateFile()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
 	s := NewSession()
 	s.File = file
 
@@ -148,15 +153,15 @@ func RunFromCmd(cmd *exec.Cmd) (string, string) {
 	return stdOut, stdErr
 }
 
-func CreateFile() *os.File {
+func CreateFile() (*os.File, error) {
 	now := time.Now()
 	filename := "shellspy-" + now.Format("2006-01-02-15:04:05") + ".txt"
 	file, err := os.OpenFile(filename,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
-	return file
+	return file, nil
 }
 
 func WriteTranscript(stdOut, stdErr string, cmd *exec.Cmd, file *os.File) os.File {
