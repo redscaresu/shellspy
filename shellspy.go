@@ -17,10 +17,35 @@ import (
 
 type session struct {
 	Input            io.Reader
-	Output           io.Writer
+	output           io.Writer
 	TranscriptOutput io.Writer
 	File             *os.File
 	Port             int
+}
+
+type Option func(*session)
+
+func WithOutput(output io.Writer) Option {
+	return func(s *session) {
+		s.output = output
+	}
+}
+
+func WithTranscriptOutput(TranscriptOutput io.Writer) Option {
+	return func(s *session) {
+		s.TranscriptOutput = TranscriptOutput
+	}
+}
+
+func NewSession(opts ...Option) *session {
+
+	session := &session{}
+
+	for _, o := range opts {
+		o(session)
+	}
+
+	return session
 }
 
 func RunCLI() {
@@ -31,7 +56,12 @@ func RunCLI() {
 		os.Exit(1)
 	}
 
-	s := NewSession()
+	output := &bytes.Buffer{}
+
+	s := NewSession(
+		WithOutput(output),
+	)
+
 	s.File = file
 
 	local := flag.String("mode", "", "set to run locally")
@@ -57,14 +87,14 @@ func RunCLI() {
 	}
 }
 
-func RunLocally(s session) {
+func RunLocally(s *session) {
 
 	fmt.Printf("shellspy is running locally\n")
 	input := bufio.NewScanner(os.Stdin)
 	Input(input, s)
 }
 
-func RunRemotely(s session) error {
+func RunRemotely(s *session) error {
 	fmt.Printf("shellspy is running remotely on port %v\n", s.Port)
 
 	address := "localhost:" + strconv.Itoa(s.Port)
@@ -82,23 +112,19 @@ func RunRemotely(s session) error {
 	}
 }
 
-func handleConn(c net.Conn, s session) {
+func handleConn(c net.Conn, s *session) {
 
 	input := bufio.NewScanner(c)
 	Input(input, s)
 	c.Close()
 }
 
-func Input(input *bufio.Scanner, s session) {
+func Input(input *bufio.Scanner, s *session) {
 
 	for input.Scan() {
 		s.Input = strings.NewReader(input.Text())
 		s.Run()
 	}
-}
-
-func NewSession() session {
-	return session{}
 }
 
 func (s *session) Run() {
@@ -110,7 +136,7 @@ func (s *session) Run() {
 	for scanner.Scan() {
 		file := s.File
 		stdOut := RunServer(scanner.Text(), file)
-		s.Output = writer
+		s.output = writer
 		s.TranscriptOutput = twriter
 		fmt.Fprint(writer, stdOut)
 		fmt.Fprint(twriter, stdOut)

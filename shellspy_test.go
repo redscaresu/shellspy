@@ -49,7 +49,9 @@ func TestWriteShellScript(t *testing.T) {
 	wantBuf := &bytes.Buffer{}
 	gotBuf := &bytes.Buffer{}
 	wantBuf.WriteString("hello world\n")
-	session := shellspy.NewSession()
+	session := shellspy.NewSession(
+		shellspy.WithTranscriptOutput(wantBuf),
+	)
 
 	session.Input = strings.NewReader("echo hello world")
 	tempDir := t.TempDir()
