@@ -127,14 +127,6 @@ func Input(input *bufio.Scanner, s *session) {
 	}
 }
 
-func convert(b []byte) string {
-	s := make([]string, len(b))
-	for i := range b {
-		s[i] = strconv.Itoa(int(b[i]))
-	}
-	return strings.Join(s, ",")
-}
-
 func (s *session) Run() {
 
 	writer := &bytes.Buffer{}
