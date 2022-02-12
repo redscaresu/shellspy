@@ -66,7 +66,6 @@ func TestWriteShellScript(t *testing.T) {
 
 	session.File = file
 	session.Run()
-	fmt.Println(session.TranscriptOutput)
 	fmt.Fprint(gotBuf, session.TranscriptOutput)
 
 	want := wantBuf.String()
