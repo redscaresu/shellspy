@@ -127,19 +127,30 @@ func Input(input *bufio.Scanner, s *session) {
 	}
 }
 
+func convert(b []byte) string {
+	s := make([]string, len(b))
+	for i := range b {
+		s[i] = strconv.Itoa(int(b[i]))
+	}
+	return strings.Join(s, ",")
+}
+
 func (s *session) Run() {
 
 	writer := &bytes.Buffer{}
 	twriter := &bytes.Buffer{}
 	iReader := &bytes.Buffer{}
 	fmt.Fprint(iReader, s.Input)
-	// iReader.WriteString(s.Input)
 	file := s.File
-	stringIreader := iReader.String()
+	// stringIreader := iReader.String()
 	//this really sucks
-	replacer := strings.NewReplacer("{", "", "}", "", "&", "", "-1", "", "0", "")
-	stringInput := replacer.Replace(stringIreader)
-	stdOut := RunServer(stringInput, file)
+	// replacer := strings.NewReplacer("{", "", "}", "", "&", "", "-1", "", "0", "")
+	// stringInput := replacer.Replace(stringIreader)
+
+	input := iReader.String()
+	input = strings.TrimPrefix(input, "&{")
+	input = strings.TrimSuffix(input, " 0 -1}")
+	stdOut := RunServer(input, file)
 	s.output = writer
 	s.TranscriptOutput = twriter
 	fmt.Fprint(writer, stdOut)
