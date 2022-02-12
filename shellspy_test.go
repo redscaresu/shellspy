@@ -71,8 +71,6 @@ func TestWriteShellScript(t *testing.T) {
 	want := wantBuf.String()
 	got := gotBuf.String()
 
-	fmt.Println(want)
-	fmt.Println(got)
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
