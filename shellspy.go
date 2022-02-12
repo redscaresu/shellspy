@@ -142,11 +142,6 @@ func (s *session) Run() {
 	iReader := &bytes.Buffer{}
 	fmt.Fprint(iReader, s.Input)
 	file := s.File
-	// stringIreader := iReader.String()
-	//this really sucks
-	// replacer := strings.NewReplacer("{", "", "}", "", "&", "", "-1", "", "0", "")
-	// stringInput := replacer.Replace(stringIreader)
-
 	input := iReader.String()
 	input = strings.TrimPrefix(input, "&{")
 	input = strings.TrimSuffix(input, " 0 -1}")
