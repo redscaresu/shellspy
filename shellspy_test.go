@@ -66,11 +66,14 @@ func TestWriteShellScript(t *testing.T) {
 
 	session.File = file
 	session.Run()
+	fmt.Println(session.TranscriptOutput)
 	fmt.Fprint(gotBuf, session.TranscriptOutput)
 
 	want := wantBuf.String()
 	got := gotBuf.String()
 
+	fmt.Println(want)
+	fmt.Println(got)
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}

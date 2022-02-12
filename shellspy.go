@@ -131,16 +131,19 @@ func (s *session) Run() {
 
 	writer := &bytes.Buffer{}
 	twriter := &bytes.Buffer{}
-
-	scanner := bufio.NewScanner(s.Input)
-	for scanner.Scan() {
-		file := s.File
-		stdOut := RunServer(scanner.Text(), file)
-		s.output = writer
-		s.TranscriptOutput = twriter
-		fmt.Fprint(writer, stdOut)
-		fmt.Fprint(twriter, stdOut)
-	}
+	iReader := &bytes.Buffer{}
+	fmt.Fprint(iReader, s.Input)
+	// iReader.WriteString(s.Input)
+	file := s.File
+	stringIreader := iReader.String()
+	//this really sucks
+	replacer := strings.NewReplacer("{", "", "}", "", "&", "", "-1", "", "0", "")
+	stringInput := replacer.Replace(stringIreader)
+	stdOut := RunServer(stringInput, file)
+	s.output = writer
+	s.TranscriptOutput = twriter
+	fmt.Fprint(writer, stdOut)
+	fmt.Fprint(twriter, stdOut)
 }
 
 func RunServer(line string, file *os.File) string {
