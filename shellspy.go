@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strconv"
 	"strings"
 	"time"
@@ -103,12 +104,17 @@ func RunRemotely(s *session) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+	killSignal := make(chan os.Signal, 1)
+	signal.Notify(killSignal, os.Interrupt)
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			return err
 		}
 		go handleConn(conn, s)
+		<-killSignal
+		fmt.Println("connection terminated by server!")
+		os.Exit(1)
 	}
 }
 
