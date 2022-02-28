@@ -1,5 +1,5 @@
 # .goreleaser.yml
-project_name: import_disqus_cli
+project_name: shellspy
 builds:
   - env: [CGO_ENABLED=0]
     goos:
@@ -9,7 +9,7 @@ builds:
     goarch:
       - amd64
       - arm64
-    id: "import_disqus_cli"
+    id: "shellspy"
     dir: .
     main: ./cmd/main.go
 
