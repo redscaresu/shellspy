@@ -112,28 +112,38 @@ func RunRemotely(s *session) error {
 			return err
 		}
 		go handleConn(conn, s)
+
 		<-killSignal
-		fmt.Println("connection terminated by server!")
-		os.Exit(1)
+		fmt.Println("\nconnection terminated by server!")
+		listener.Close()
 	}
 }
 
-func handleConn(c net.Conn, s *session) {
+func handleConn(c net.Conn, s *session) string {
 
+	c.Write([]byte("hello, welcome to shellspy" + "\n"))
 	input := bufio.NewScanner(c)
-	Input(input, s)
+	exitStatus := Input(input, s)
+	if exitStatus == "0" {
+		c.Close()
+	}
 	c.Close()
+	return ""
 }
 
-func Input(input *bufio.Scanner, s *session) {
+func Input(input *bufio.Scanner, s *session) string {
 
 	for input.Scan() {
 		s.Input = strings.NewReader(input.Text())
-		s.Run()
+		exitStatus := s.Run()
+		if exitStatus == "0" {
+			return "0"
+		}
 	}
+	return ""
 }
 
-func (s *session) Run() {
+func (s *session) Run() string {
 
 	writer := &bytes.Buffer{}
 	twriter := &bytes.Buffer{}
@@ -143,24 +153,28 @@ func (s *session) Run() {
 	input := iReader.String()
 	input = strings.TrimPrefix(input, "&{")
 	input = strings.TrimSuffix(input, " 0 -1}")
-	stdOut := RunServer(input, file)
+	stdOut, exitStatus := RunServer(input, file)
+	if exitStatus == "0" {
+		return "0"
+	}
 	s.output = writer
 	s.TranscriptOutput = twriter
 	fmt.Fprint(writer, stdOut)
 	fmt.Fprint(twriter, stdOut)
+	return ""
 }
 
-func RunServer(line string, file *os.File) string {
+func RunServer(line string, file *os.File) (string, string) {
 
 	cmd := CommandFromString(line)
 
 	if strings.HasPrefix(line, "exit") {
-		os.Exit(0)
+		return "", "0"
 	}
 
 	stdOut, stdErr := RunFromCmd(cmd)
 	WriteTranscript(stdOut, stdErr, cmd, file)
-	return stdOut
+	return stdOut, ""
 }
 
 func CommandFromString(line string) *exec.Cmd {
