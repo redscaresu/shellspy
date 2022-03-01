@@ -51,7 +51,7 @@ func NewSession(opts ...Option) *session {
 
 func RunCLI() {
 
-	file, err := CreateFile()
+	file, err := CreateTranscriptFile()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -200,7 +200,7 @@ func RunFromCmd(cmd *exec.Cmd) (string, string) {
 	return stdOut, stdErr
 }
 
-func CreateFile() (*os.File, error) {
+func CreateTranscriptFile() (*os.File, error) {
 	now := time.Now()
 	filename := ".shellspy-" + now.Format("2006-01-02-15:04:05") + ".txt"
 	file, err := os.OpenFile(filename,
