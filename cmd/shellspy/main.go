@@ -1,7 +1,7 @@
 package main
 
 import (
-	"shellspy"
+	"github.com/redscaresu/shellspy"
 )
 
 func main() {
