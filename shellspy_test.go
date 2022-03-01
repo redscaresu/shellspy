@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"shellspy"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/redscaresu/shellspy"
 
 	"github.com/google/go-cmp/cmp"
 )
