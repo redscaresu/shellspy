@@ -38,7 +38,7 @@ func WithTranscriptOutput(TranscriptOutput io.Writer) Option {
 	}
 }
 
-func NewSession(opts ...Option) *session {
+func NewSession(opts ...Option) (*session, error) {
 
 	session := &session{}
 
@@ -46,24 +46,26 @@ func NewSession(opts ...Option) *session {
 		o(session)
 	}
 
-	return session
+	file, err := CreateTranscriptFile()
+	if err != nil {
+		return session, err
+	}
+	session.File = file
+
+	return session, nil
 }
 
 func RunCLI() {
 
-	file, err := CreateTranscriptFile()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-
 	output := &bytes.Buffer{}
 
-	s := NewSession(
+	s, err := NewSession(
 		WithOutput(output),
 	)
-
-	s.File = file
+	if err != nil {
+		fmt.Printf("%v", err)
+		os.Exit(1)
+	}
 
 	local := flag.String("mode", "", "set to run locally")
 	port := flag.Int("port", 0, "port number")
