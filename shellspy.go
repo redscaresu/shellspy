@@ -57,7 +57,9 @@ func NewSession(opts ...Option) (*session, error) {
 
 func RunCLI() {
 
-	output := &bytes.Buffer{}
+	// output := &bytes.Buffer{}
+
+	output := os.Stdout
 
 	s, err := NewSession(
 		WithOutput(output),
