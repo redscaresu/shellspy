@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -113,7 +112,7 @@ func RunRemotely(s *session) error {
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	killSignal := make(chan os.Signal, 1)
 	signal.Notify(killSignal, os.Interrupt)
