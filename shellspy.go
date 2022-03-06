@@ -129,16 +129,15 @@ func RunRemotely(s *session) error {
 	}
 }
 
-func handleConn(c net.Conn, s *session) string {
+func handleConn(c net.Conn, s *session) {
 
-	c.Write([]byte("hello, welcome to shellspy" + "\n"))
+	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n")
 	input := bufio.NewScanner(c)
 	exitStatus := Input(input, s)
 	if exitStatus == "0" {
 		c.Close()
 	}
 	c.Close()
-	return ""
 }
 
 func Input(input *bufio.Scanner, s *session) string {
