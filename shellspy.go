@@ -77,9 +77,9 @@ func RunCLI() {
 
 	switch os.Args[1] {
 	case "help":
-		fmt.Println("Usage: [ --port int | --mode local ]")
+		fmt.Println("Usage: [ port int | local | help | h ]")
 	case "h":
-		fmt.Println("Usage: [ --port int | --mode local ]")
+		fmt.Println("Usage: [ port int | local | help | h ]")
 	case "port":
 		cmd.Parse(os.Args[1:])
 		s.Port = cmd.Arg(1)
@@ -95,13 +95,19 @@ func RunCLI() {
 
 func RunLocally(s *session) {
 
-	fmt.Printf("shellspy is running locally\n")
+	buf := &bytes.Buffer{}
+	fmt.Fprint(buf, "shellspy is running locally\n")
+	s.output = buf
+	fmt.Print(s.output)
 	input := bufio.NewScanner(os.Stdin)
 	Input(input, s)
 }
 
 func RunRemotely(s *session) error {
-	fmt.Printf("shellspy is running remotely on port %v\n", s.Port)
+	buf := &bytes.Buffer{}
+	fmt.Fprint(buf, "shellspy is running locally "+s.Port+"\n")
+	s.output = buf
+	fmt.Print(s.output)
 
 	address := "localhost:" + s.Port
 
