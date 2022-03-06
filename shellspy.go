@@ -98,7 +98,8 @@ func RunLocally(s *session) {
 	fmt.Fprint(buf, "shellspy is running locally\n")
 	s.output = buf
 	fmt.Print(s.output)
-	input := bufio.NewScanner(os.Stdin)
+	// input := bufio.NewScanner(os.Stdin)
+	input := io.Reader(os.Stdin)
 	Input(input, s)
 }
 
@@ -132,7 +133,7 @@ func RunRemotely(s *session) error {
 func handleConn(c net.Conn, s *session) {
 
 	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n")
-	input := bufio.NewScanner(c)
+	input := io.Reader(c)
 	exitStatus := Input(input, s)
 	if exitStatus == "0" {
 		c.Close()
@@ -140,10 +141,11 @@ func handleConn(c net.Conn, s *session) {
 	c.Close()
 }
 
-func Input(input *bufio.Scanner, s *session) string {
+func Input(input io.Reader, s *session) string {
 
-	for input.Scan() {
-		s.Input = strings.NewReader(input.Text())
+	scanner := bufio.NewScanner(input)
+	for scanner.Scan() {
+		s.Input = strings.NewReader(scanner.Text())
 		exitStatus := s.Run()
 		if exitStatus == "0" {
 			return "0"
