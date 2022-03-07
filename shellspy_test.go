@@ -16,9 +16,11 @@ import (
 
 func TestCommandFromString(t *testing.T) {
 
-	input := "echo hello world\n"
-	want := "/bin/echo hello world"
-	got := shellspy.CommandFromString(input).String()
+	cmdWant := &exec.Cmd{}
+	cmdWant.Args = []string{"/bin/echo", "hello", "world"}
+	wantCmd := cmdWant.String()
+	want := strings.TrimPrefix(wantCmd, " ")
+	got := shellspy.CommandFromString(want).String()
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
