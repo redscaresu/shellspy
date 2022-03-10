@@ -78,3 +78,26 @@ func TestWriteShellScript(t *testing.T) {
 		t.Error(cmp.Diff(want, got))
 	}
 }
+
+func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
+
+	buf := &bytes.Buffer{}
+	buf.WriteString("shellspy is running locally\n")
+
+	flagArgs := []string{}
+	shellspy.RunCLI(flagArgs, buf)
+	got := buf.String()
+
+	want := "shellspy is running locally\n"
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+
+}
+
+// func TestPortFlagStartsNetListener(t *testing.T) {
+
+// 	flagArgs := []string{"port", "9999"}
+// 	shellspy.RunCLI(flagArgs)
+// }

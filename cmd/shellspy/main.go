@@ -1,10 +1,13 @@
 package main
 
 import (
+	"os"
+
 	"github.com/redscaresu/shellspy"
 )
 
 func main() {
 
-	shellspy.RunCLI()
+	cliArgs := os.Args
+	shellspy.RunCLI(cliArgs, os.Stdout)
 }

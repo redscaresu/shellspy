@@ -3,7 +3,6 @@ package shellspy
 import (
 	"bufio"
 	"bytes"
-	"flag"
 	"fmt"
 	"io"
 	"net"
@@ -16,7 +15,7 @@ import (
 
 type session struct {
 	Input            io.Reader
-	output           io.Writer
+	Output           io.Writer
 	TranscriptOutput io.Writer
 	File             *os.File
 	Port             string
@@ -26,7 +25,7 @@ type Option func(*session)
 
 func WithOutput(output io.Writer) Option {
 	return func(s *session) {
-		s.output = output
+		s.Output = output
 	}
 }
 
@@ -53,61 +52,66 @@ func NewSession(opts ...Option) (*session, error) {
 	return session, nil
 }
 
-func RunCLI() {
+func RunCLI(cliArgs []string, w io.Writer) {
 
-	output := os.Stdout
+	// // var foo *bytes.Buffer
+	// // testString := []byte("I am from the program!")
+
+	// // w.Write(testString)
+
+	// fmt.Fprint(w, foo)
+	// fmt.Println(foo.String())
 
 	s, err := NewSession(
-		WithOutput(output),
+		WithOutput(w),
 	)
 	if err != nil {
 		fmt.Printf("%v", err)
 		os.Exit(1)
 	}
 
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: [ --port int | --mode local ]")
-		os.Exit(1)
+	if len(cliArgs) == 1 {
+		RunLocally(s, w)
 	}
 
-	cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
-	cmd.Bool("help", false, "Print this help message")
-	cmd.Bool("h", false, "Print this help message")
+	// cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
+	// cmd.Bool("help", false, "Print this help message")
+	// cmd.Bool("h", false, "Print this help message")
 
-	switch os.Args[1] {
-	case "help":
-		fmt.Println("Usage: [ port int | local | help | h ]")
-	case "h":
-		fmt.Println("Usage: [ port int | local | help | h ]")
-	case "port":
-		cmd.Parse(os.Args[1:])
-		s.Port = cmd.Arg(1)
-		RunRemotely(s)
-	case "local":
-		cmd.Parse(os.Args[2:])
-		RunLocally(s)
-	default:
-		fmt.Println("Usage: [ port int | local | help | h ]")
-		os.Exit(1)
-	}
+	// switch os.Args[1] {
+	// case "help":
+	// 	fmt.Println("Usage: [ port int | local | help | h ]")
+	// case "h":
+	// 	fmt.Println("Usage: [ port int | local | help | h ]")
+	// case "port":
+	// 	cmd.Parse(os.Args[1:])
+	// 	s.Port = cmd.Arg(1)
+	// 	RunRemotely(s)
+	// case "local":
+	// 	cmd.Parse(os.Args[2:])
+	// 	RunLocally(s, w)
+	// default:
+	// 	cmd.PrintDefaults()
+	// 	// fmt.Println("Usage: [ port int | local | help | h ]")
+	// 	os.Exit(1)
+	// }
 }
 
-func RunLocally(s *session) {
+func RunLocally(s *session, w io.Writer) {
 
 	buf := &bytes.Buffer{}
-	fmt.Fprint(buf, "shellspy is running locally\n")
-	s.output = buf
-	fmt.Print(s.output)
-	// input := bufio.NewScanner(os.Stdin)
+	buf.WriteString("shellspy is running locally\n")
+	fmt.Fprint(w, buf)
+	s.Output = w
 	input := io.Reader(os.Stdin)
 	Input(input, s)
 }
 
 func RunRemotely(s *session) error {
 	buf := &bytes.Buffer{}
-	fmt.Fprint(buf, "shellspy is running locally "+s.Port+"\n")
-	s.output = buf
-	fmt.Print(s.output)
+	fmt.Fprint(buf, "shellspy is running remotely "+s.Port+"\n")
+	s.Output = buf
+	fmt.Print(s.Output)
 
 	address := "localhost:" + s.Port
 
@@ -168,7 +172,7 @@ func (s *session) Run() string {
 	if exitStatus == "0" {
 		return "0"
 	}
-	s.output = writer
+	s.Output = writer
 	s.TranscriptOutput = twriter
 	fmt.Fprint(writer, stdOut)
 	fmt.Fprint(twriter, stdOut)
