@@ -66,6 +66,10 @@ func RunCLI(cliArgs []string, w io.Writer) {
 		RunLocally(s, w)
 	}
 
+	if len(cliArgs) > 1 {
+		fmt.Println(len(cliArgs))
+	}
+
 	// cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
 	// cmd.Bool("help", false, "Print this help message")
 	// cmd.Bool("h", false, "Print this help message")
