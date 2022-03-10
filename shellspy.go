@@ -54,14 +54,6 @@ func NewSession(opts ...Option) (*session, error) {
 
 func RunCLI(cliArgs []string, w io.Writer) {
 
-	// // var foo *bytes.Buffer
-	// // testString := []byte("I am from the program!")
-
-	// // w.Write(testString)
-
-	// fmt.Fprint(w, foo)
-	// fmt.Println(foo.String())
-
 	s, err := NewSession(
 		WithOutput(w),
 	)
