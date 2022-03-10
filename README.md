@@ -7,21 +7,22 @@
 To install the client binary, run:
 
 ```
-go get -u github.com/redscaresu/shellspy
+go install github.com/redscaresu/shellspy/cmd/shellspy
 ```
 
 ## Using the command-line client
 
 To use shellspy run:
 
+
 ```
-> shellspy --port 9999
-shellspy is running remotely on port 9999
+> go run cmd/main.go
+shellspy is running locally
 ```
 
 OR
 
 ```
-> go run cmd/main.go --mode local
-shellspy is running locally
+> shellspy --port 9999
+shellspy is running remotely on port 9999
 ```
