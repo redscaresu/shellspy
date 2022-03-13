@@ -11,5 +11,5 @@ builds:
       - arm64
     id: "shellspy"
     dir: .
-    main: ./cmd/main.go
+    main: ./cmd/shellspy/main.go
 

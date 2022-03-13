@@ -3,12 +3,14 @@ package shellspy
 import (
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"io"
 	"net"
 	"os"
 	"os/exec"
 	"os/signal"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -18,7 +20,7 @@ type session struct {
 	Output           io.Writer
 	TranscriptOutput io.Writer
 	File             *os.File
-	Port             string
+	Port             int
 }
 
 type Option func(*session)
@@ -62,35 +64,25 @@ func RunCLI(cliArgs []string, w io.Writer) {
 		os.Exit(1)
 	}
 
-	if len(cliArgs) == 1 {
+	fset := flag.NewFlagSet(os.Args[1], flag.ContinueOnError)
+	fset.SetOutput(os.Stderr)
+	port := fset.Int("port", 9999, "the port that we need to listen on")
+	fset.Parse(cliArgs)
+
+	if len(cliArgs) > 3 {
+		fmt.Println(cliArgs)
+		fmt.Println(len(cliArgs))
+		os.Exit(1)
+	}
+
+	cliArgs = fset.Args()
+	if len(cliArgs) < 1 {
 		RunLocally(s, w)
 	}
 
-	if len(cliArgs) > 1 {
-		fmt.Println(len(cliArgs))
-	}
+	s.Port = *port
+	RunRemotely(s, w)
 
-	// cmd := flag.NewFlagSet("cmd", flag.ExitOnError)
-	// cmd.Bool("help", false, "Print this help message")
-	// cmd.Bool("h", false, "Print this help message")
-
-	// switch os.Args[1] {
-	// case "help":
-	// 	fmt.Println("Usage: [ port int | local | help | h ]")
-	// case "h":
-	// 	fmt.Println("Usage: [ port int | local | help | h ]")
-	// case "port":
-	// 	cmd.Parse(os.Args[1:])
-	// 	s.Port = cmd.Arg(1)
-	// 	RunRemotely(s)
-	// case "local":
-	// 	cmd.Parse(os.Args[2:])
-	// 	RunLocally(s, w)
-	// default:
-	// 	cmd.PrintDefaults()
-	// 	// fmt.Println("Usage: [ port int | local | help | h ]")
-	// 	os.Exit(1)
-	// }
 }
 
 func RunLocally(s *session, w io.Writer) {
@@ -103,13 +95,15 @@ func RunLocally(s *session, w io.Writer) {
 	Input(input, s)
 }
 
-func RunRemotely(s *session) error {
-	buf := &bytes.Buffer{}
-	fmt.Fprint(buf, "shellspy is running remotely "+s.Port+"\n")
-	s.Output = buf
-	fmt.Print(s.Output)
+func RunRemotely(s *session, w io.Writer) error {
 
-	address := "localhost:" + s.Port
+	port := strconv.Itoa(s.Port)
+	buf := &bytes.Buffer{}
+	buf.WriteString("shellspy is running remotely " + port + "\n")
+	fmt.Fprint(w, buf)
+	s.Output = buf
+
+	address := "localhost:" + port
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
