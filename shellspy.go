@@ -69,7 +69,7 @@ func RunCLI(cliArgs []string, w io.Writer) {
 		RunLocally(s, w)
 	}
 
-	fset := flag.NewFlagSet("foo", flag.ContinueOnError)
+	fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	fset.SetOutput(os.Stderr)
 	port := fset.Int("port", 9999, "the port that we need to listen on")
 	fset.Parse(cliArgs)
@@ -80,7 +80,6 @@ func RunCLI(cliArgs []string, w io.Writer) {
 	}
 
 	s.Port = *port
-	fmt.Println(args)
 	// RunRemotely(s, w)
 
 }
