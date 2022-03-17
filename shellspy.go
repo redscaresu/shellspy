@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -20,7 +19,7 @@ type session struct {
 	Output           io.Writer
 	TranscriptOutput io.Writer
 	File             *os.File
-	Port             int
+	Port             string
 }
 
 type Option func(*session)
@@ -59,29 +58,27 @@ func RunCLI(cliArgs []string, w io.Writer) {
 	s, err := NewSession(
 		WithOutput(w),
 	)
+
 	if err != nil {
 		fmt.Printf("%v", err)
 		os.Exit(1)
 	}
 
-	fset := flag.NewFlagSet(os.Args[1], flag.ContinueOnError)
-	fset.SetOutput(os.Stderr)
-	port := fset.Int("port", 9999, "the port that we need to listen on")
-	fset.Parse(cliArgs)
-
-	if len(cliArgs) > 3 {
-		fmt.Println(cliArgs)
-		fmt.Println(len(cliArgs))
-		os.Exit(1)
-	}
-
-	cliArgs = fset.Args()
-	if len(cliArgs) < 1 {
+	fmt.Println(len(cliArgs))
+	fmt.Println(cliArgs)
+	if len(cliArgs) == 1 {
 		RunLocally(s, w)
 	}
 
-	s.Port = *port
-	RunRemotely(s, w)
+	fs := flag.NewFlagSet("cmd", flag.ContinueOnError)
+	fs.Parse(os.Args[1:])
+
+	switch os.Args[1] {
+	case "port":
+		args := fs.Args()
+		s.Port = args[1]
+		RunRemotely(s, w)
+	}
 
 }
 
@@ -97,11 +94,11 @@ func RunLocally(s *session, w io.Writer) {
 
 func RunRemotely(s *session, w io.Writer) error {
 
-	port := strconv.Itoa(s.Port)
+	port := s.Port
 	buf := &bytes.Buffer{}
 	buf.WriteString("shellspy is running remotely " + port + "\n")
 	fmt.Fprint(w, buf)
-	s.Output = buf
+	s.TranscriptOutput = buf
 
 	address := "localhost:" + port
 
