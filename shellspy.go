@@ -64,7 +64,9 @@ func RunCLI(cliArgs []string, w io.Writer) {
 		os.Exit(1)
 	}
 
-	if len(cliArgs) == 0 {
+	fmt.Println(len(cliArgs))
+	fmt.Println(cliArgs)
+	if len(cliArgs) == 1 {
 		RunLocally(s, w)
 	}
 

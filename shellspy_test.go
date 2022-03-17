@@ -83,7 +83,7 @@ func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
 
 	buf := &bytes.Buffer{}
 
-	flagArgs := []string{}
+	flagArgs := []string{"/var/folders/1v/4mmgcg8s51362djr4g9s9sfw0000gn/T/go-build3590226918/b001/exe/main"}
 
 	shellspy.RunCLI(flagArgs, buf)
 	got := buf.String()
