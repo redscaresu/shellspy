@@ -98,6 +98,16 @@ func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
 
 // func TestPortFlagStartsNetListener(t *testing.T) {
 
-// 	flagArgs := []string{"port", "9999"}
-// 	shellspy.RunCLI(flagArgs)
+// 	buf := &bytes.Buffer{}
+
+// 	flagArgs := []string{"/var/folders/1v/4mmgcg8s51362djr4g9s9sfw0000gn/T/go-build3590226918/b001/exe/main", "port", "6666"}
+
+// 	shellspy.RunCLI(flagArgs, buf)
+// 	got := buf.String()
+
+// 	want := "shellspy is running remotely on port 6666\n"
+
+// 	if !cmp.Equal(want, got) {
+// 		t.Error(cmp.Diff(want, got))
+// 	}
 // }

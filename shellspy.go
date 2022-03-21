@@ -64,8 +64,6 @@ func RunCLI(cliArgs []string, w io.Writer) {
 		os.Exit(1)
 	}
 
-	fmt.Println(len(cliArgs))
-	fmt.Println(cliArgs)
 	if len(cliArgs) == 1 {
 		RunLocally(s, w)
 	}
@@ -73,10 +71,12 @@ func RunCLI(cliArgs []string, w io.Writer) {
 	fs := flag.NewFlagSet("cmd", flag.ContinueOnError)
 	fs.Parse(os.Args[1:])
 
+	fmt.Println(os.Args)
 	switch os.Args[1] {
 	case "port":
 		args := fs.Args()
 		s.Port = args[1]
+		fmt.Println("bollox")
 		RunRemotely(s, w)
 	}
 
@@ -94,13 +94,12 @@ func RunLocally(s *session, w io.Writer) {
 
 func RunRemotely(s *session, w io.Writer) error {
 
-	port := s.Port
 	buf := &bytes.Buffer{}
-	buf.WriteString("shellspy is running remotely " + port + "\n")
+	buf.WriteString("shellspy is running remotely " + s.Port + "\n")
 	fmt.Fprint(w, buf)
-	s.TranscriptOutput = buf
+	s.TranscriptOutput = w
 
-	address := "localhost:" + port
+	address := "localhost:" + s.Port
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
