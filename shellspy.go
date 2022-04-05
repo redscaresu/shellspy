@@ -182,8 +182,8 @@ func CommandFromString(line string) *exec.Cmd {
 	trim := strings.TrimSuffix(line, "\n")
 	name := strings.Fields(trim)
 	args := name[1:]
-	join := strings.Join(args, " ")
-	cmd := exec.Command(name[0], join)
+	cmd := exec.Command(name[0], args...)
+	fmt.Println(cmd.Args)
 	return cmd
 }
 

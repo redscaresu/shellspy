@@ -26,6 +26,14 @@ func TestCommandFromString(t *testing.T) {
 		t.Error(cmp.Diff(want, got))
 	}
 }
+func TestCommandFromStringArgs(t *testing.T) {
+	input := "ls"
+	want := []string{"ls"}
+	got := shellspy.CommandFromString(input).Args
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
 
 func TestRunCommand(t *testing.T) {
 
