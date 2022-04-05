@@ -15,42 +15,43 @@ import (
 )
 
 type session struct {
-	Input            io.Reader
-	Output           io.Writer
-	TranscriptOutput io.Writer
-	File             *os.File
-	Port             string
+	Input      io.Reader
+	Output     io.Writer
+	Terminal   io.Writer
+	Transcript io.Writer
+	Port       string
 }
 
 type Option func(*session)
 
 func WithOutput(output io.Writer) Option {
 	return func(s *session) {
-		s.Output = output
+		s.Terminal = output
 	}
 }
 
 func WithTranscriptOutput(TranscriptOutput io.Writer) Option {
 	return func(s *session) {
-		s.TranscriptOutput = TranscriptOutput
+		s.Transcript = TranscriptOutput
 	}
 }
 
 func NewSession(opts ...Option) (*session, error) {
 
-	session := &session{}
+	s := &session{}
 
 	for _, o := range opts {
-		o(session)
+		o(s)
 	}
 
 	file, err := CreateTranscriptFile()
 	if err != nil {
-		return session, err
+		return s, err
 	}
-	session.File = file
-
-	return session, nil
+	s.Transcript = file
+	s.Input = os.Stdin
+	s.Output = io.MultiWriter(s.Terminal, s.Transcript)
+	return s, nil
 }
 
 func RunCLI(cliArgs []string, w io.Writer) {
@@ -65,7 +66,8 @@ func RunCLI(cliArgs []string, w io.Writer) {
 	}
 
 	if len(cliArgs) == 1 {
-		RunLocally(s, w)
+		fmt.Fprint(s.Output, "shellspy is running locally\n")
+		s.Start()
 	}
 
 	fs := flag.NewFlagSet("cmd", flag.ContinueOnError)
@@ -82,22 +84,12 @@ func RunCLI(cliArgs []string, w io.Writer) {
 
 }
 
-func RunLocally(s *session, w io.Writer) {
-
-	buf := &bytes.Buffer{}
-	buf.WriteString("shellspy is running locally\n")
-	fmt.Fprint(w, buf)
-	s.Output = w
-	input := io.Reader(os.Stdin)
-	Input(input, s)
-}
-
 func RunRemotely(s *session, w io.Writer) error {
 
 	buf := &bytes.Buffer{}
 	buf.WriteString("shellspy is running remotely " + s.Port + "\n")
 	fmt.Fprint(w, buf)
-	s.TranscriptOutput = w
+	s.Transcript = w
 
 	address := "localhost:" + s.Port
 
@@ -123,46 +115,24 @@ func RunRemotely(s *session, w io.Writer) error {
 func handleConn(c net.Conn, s *session) {
 
 	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n")
-	input := io.Reader(c)
-	exitStatus := Input(input, s)
-	if exitStatus == "0" {
-		c.Close()
-	}
+	// input := io.Reader(c)
+	// exitStatus := Input(input, s)
+	// if exitStatus == "0" {
+	// 	c.Close()
+	// }
 	c.Close()
 }
 
-func Input(input io.Reader, s *session) string {
+func (s *session) Start() {
 
-	scanner := bufio.NewScanner(input)
+	scanner := bufio.NewScanner(s.Input)
 	for scanner.Scan() {
-		s.Input = strings.NewReader(scanner.Text())
-		exitStatus := s.Run()
-		if exitStatus == "0" {
-			return "0"
-		}
-	}
-	return ""
-}
+		cmd := CommandFromString(scanner.Text())
+		cmd.Stdout = s.Output
+		cmd.Stderr = s.Output
+		cmd.Run()
 
-func (s *session) Run() string {
-
-	writer := &bytes.Buffer{}
-	twriter := &bytes.Buffer{}
-	iReader := &bytes.Buffer{}
-	fmt.Fprint(iReader, s.Input)
-	file := s.File
-	input := iReader.String()
-	input = strings.TrimPrefix(input, "&{")
-	input = strings.TrimSuffix(input, " 0 -1}")
-	stdOut, exitStatus := RunServer(input, file)
-	if exitStatus == "0" {
-		return "0"
 	}
-	s.Output = writer
-	s.TranscriptOutput = twriter
-	fmt.Fprint(writer, stdOut)
-	fmt.Fprint(twriter, stdOut)
-	return ""
 }
 
 func RunServer(line string, file *os.File) (string, string) {
