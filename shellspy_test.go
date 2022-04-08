@@ -1,25 +1,34 @@
 package shellspy_test
 
-// func TestCommandFromString(t *testing.T) {
+import (
+	"os/exec"
+	"strings"
+	"testing"
 
-// 	cmdWant := &exec.Cmd{}
-// 	cmdWant.Args = []string{"/bin/echo", "hello", "world"}
-// 	wantCmd := cmdWant.String()
-// 	want := strings.TrimPrefix(wantCmd, " ")
-// 	got := shellspy.CommandFromString(want).String()
+	"github.com/google/go-cmp/cmp"
+	"github.com/redscaresu/shellspy"
+)
 
-// 	if !cmp.Equal(want, got) {
-// 		t.Error(cmp.Diff(want, got))
-// 	}
-// }
-// func TestCommandFromStringArgs(t *testing.T) {
-// 	input := "ls"
-// 	want := []string{"ls"}
-// 	got := shellspy.CommandFromString(input).Args
-// 	if !cmp.Equal(want, got) {
-// 		t.Error(cmp.Diff(want, got))
-// 	}
-// }
+func TestCommandFromString(t *testing.T) {
+
+	cmdWant := &exec.Cmd{}
+	cmdWant.Args = []string{"/bin/echo", "hello", "world"}
+	wantCmd := cmdWant.String()
+	want := strings.TrimPrefix(wantCmd, " ")
+	got := shellspy.CommandFromString(want).String()
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+func TestCommandFromStringArgs(t *testing.T) {
+	input := "ls"
+	want := []string{"ls"}
+	got := shellspy.CommandFromString(input).Args
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
 
 // func TestRunCommand(t *testing.T) {
 
