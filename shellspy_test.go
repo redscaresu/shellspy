@@ -1,6 +1,9 @@
 package shellspy_test
 
 import (
+	"bytes"
+	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
@@ -28,6 +31,21 @@ func TestCommandFromStringArgs(t *testing.T) {
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
+}
+
+func TestRunCommand(t *testing.T) {
+
+	wantBuf := &bytes.Buffer{}
+	gotBuf := &bytes.Buffer{}
+	s, err := shellspy.NewSession(os.Stdout)
+	if err != nil {
+		t.Fatal("unable to create file")
+	}
+	s.Start()
+	fmt.Fprint(wantBuf, "shellspy is running locally\n")
+	fmt.Fprint(gotBuf, s.Output)
+	fmt.Println(gotBuf)
+
 }
 
 // func TestRunCommand(t *testing.T) {

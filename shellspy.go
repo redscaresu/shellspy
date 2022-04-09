@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type session struct {
+type Session struct {
 	Input      io.Reader
 	Output     io.Writer
 	Terminal   io.Writer
@@ -18,8 +18,8 @@ type session struct {
 	Port       string
 }
 
-func NewSession(output io.Writer) (*session, error) {
-	s := &session{}
+func NewSession(output io.Writer) (*Session, error) {
+	s := &Session{}
 
 	file, err := CreateTranscriptFile()
 	if err != nil {
@@ -32,9 +32,9 @@ func NewSession(output io.Writer) (*session, error) {
 	return s, nil
 }
 
-func RunCLI(cliArgs []string, w io.Writer) {
+func RunCLI(cliArgs []string, output io.Writer) {
 
-	s, err := NewSession(w)
+	s, err := NewSession(output)
 
 	if err != nil {
 		fmt.Printf("%v", err)
@@ -45,10 +45,9 @@ func RunCLI(cliArgs []string, w io.Writer) {
 		fmt.Fprint(s.Output, "shellspy is running locally\n")
 		s.Start()
 	}
-
 }
 
-func (s *session) Start() {
+func (s *Session) Start() {
 
 	scanner := bufio.NewScanner(s.Input)
 	for scanner.Scan() {
@@ -56,7 +55,6 @@ func (s *session) Start() {
 		cmd.Stdout = s.Output
 		cmd.Stderr = s.Output
 		cmd.Run()
-
 	}
 }
 
