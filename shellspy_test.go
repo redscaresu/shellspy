@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/redscaresu/shellspy"
@@ -37,15 +38,30 @@ func TestRunCommand(t *testing.T) {
 
 	wantBuf := &bytes.Buffer{}
 	gotBuf := &bytes.Buffer{}
-	s, err := shellspy.NewSession(os.Stdout)
+	s, err := shellspy.NewSession(gotBuf)
+	s.Input = strings.NewReader("echo hello world")
 	if err != nil {
 		t.Fatal("unable to create file")
 	}
-	s.Start()
-	fmt.Fprint(wantBuf, "shellspy is running locally\n")
-	fmt.Fprint(gotBuf, s.Output)
-	fmt.Println(gotBuf)
+	tempDir := t.TempDir()
 
+	now := time.Now()
+	filename := tempDir + "shellspy-" + now.Format("2006-01-02-15:04:05") + ".txt"
+	file, err := os.OpenFile(filename,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatal("unable to create file")
+	}
+	s.Transcript = file
+
+	s.Start()
+	fmt.Fprint(wantBuf, s.Terminal)
+	want := wantBuf.String()
+	got := "hello world\n"
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
 }
 
 // func TestRunCommand(t *testing.T) {
