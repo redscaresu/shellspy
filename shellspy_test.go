@@ -85,7 +85,7 @@ func TestPortFlagStartsNetListener(t *testing.T) {
 
 	buf := &bytes.Buffer{}
 
-	flagArgs := []string{"/var/folders/1v/4mmgcg8s51362djr4g9s9sfw0000gn/T/go-build3590226918/b001/exe/main", "port", "6666"}
+	flagArgs := []string{"-port", "6666"}
 
 	go shellspy.RunCLI(flagArgs, buf)
 

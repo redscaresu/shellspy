@@ -17,7 +17,7 @@ type Session struct {
 	Output     io.Writer
 	Terminal   io.Writer
 	Transcript io.Writer
-	Port       string
+	Port       int
 }
 
 func NewSession(output io.Writer) (*Session, error) {
@@ -49,20 +49,20 @@ func RunCLI(cliArgs []string, output io.Writer) {
 	}
 
 	fs := flag.NewFlagSet("cmd", flag.ContinueOnError)
-	fs.Parse(cliArgs[1:])
+	portFlag := fs.Int("port", 2000, "-port 3000")
 
-	switch cliArgs[1] {
-	case "port":
-		args := fs.Args()
-		s.Port = args[1]
+	fs.Parse(cliArgs)
+
+	if portFlag != nil {
+		s.Port = *portFlag
 		RunRemotely(s)
 	}
 }
 
 func RunRemotely(s *Session) error {
 
-	fmt.Fprint(s.Output, "shellspy is running remotely on port "+s.Port+"\n")
-	address := "localhost:" + s.Port
+	fmt.Fprintf(s.Output, "shellspy is running remotely on port %d\n", s.Port)
+	address := fmt.Sprintf("localhost:%d", s.Port)
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
