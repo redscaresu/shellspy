@@ -2,7 +2,6 @@ package shellspy
 
 import (
 	"bufio"
-	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -50,23 +49,19 @@ func RunCLI(cliArgs []string, output io.Writer) {
 	}
 
 	fs := flag.NewFlagSet("cmd", flag.ContinueOnError)
-	fs.Parse(os.Args[1:])
+	fs.Parse(cliArgs[1:])
 
-	switch os.Args[1] {
+	switch cliArgs[1] {
 	case "port":
 		args := fs.Args()
 		s.Port = args[1]
-		RunRemotely(s, output)
+		RunRemotely(s)
 	}
 }
 
-func RunRemotely(s *Session, output io.Writer) error {
+func RunRemotely(s *Session) error {
 
-	buf := &bytes.Buffer{}
-	buf.WriteString("shellspy is running remotely " + s.Port + "\n")
-	fmt.Fprint(output, buf)
-	s.Transcript = output
-
+	fmt.Fprint(s.Output, "shellspy is running remotely on port "+s.Port+"\n")
 	address := "localhost:" + s.Port
 
 	listener, err := net.Listen("tcp", address)
