@@ -90,10 +90,10 @@ func TestPortFlagStartsNetListener(t *testing.T) {
 	go shellspy.RunCLI(flagArgs, buf)
 
 	for buf.String() == "" {
+		time.Sleep(1 * time.Second)
 	}
 
 	got := buf.String()
-	fmt.Println(got)
 
 	want := "shellspy is running remotely on port 6666\n"
 
