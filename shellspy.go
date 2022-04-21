@@ -48,15 +48,19 @@ func RunCLI(cliArgs []string, output io.Writer) {
 		s.Start()
 	}
 
-	fs := flag.NewFlagSet("cmd", flag.ContinueOnError)
-	portFlag := fs.Int("port", 2000, "-port 3000")
+	if len(cliArgs) == 2 {
 
-	fs.Parse(cliArgs)
+		fs := flag.NewFlagSet("cmd", flag.ExitOnError)
+		portFlag := fs.Int("port", 2000, "-port 3000")
 
-	if portFlag != nil {
-		s.Port = *portFlag
-		RunRemotely(s)
+		fs.Parse(cliArgs)
+
+		if portFlag != nil {
+			s.Port = *portFlag
+			RunRemotely(s)
+		}
 	}
+
 }
 
 func RunRemotely(s *Session) error {

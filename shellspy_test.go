@@ -64,22 +64,26 @@ func TestRunCommand(t *testing.T) {
 	}
 }
 
-// func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
+func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
 
-// 	buf := &bytes.Buffer{}
+	buf := &bytes.Buffer{}
 
-// 	flagArgs := []string{"/var/folders/1v/4mmgcg8s51362djr4g9s9sfw0000gn/T/go-build3590226918/b001/exe/main"}
+	flagArgs := []string{""}
 
-// 	shellspy.RunCLI(flagArgs, buf)
-// 	got := buf.String()
+	go shellspy.RunCLI(flagArgs, buf)
 
-// 	want := "shellspy is running locally\n"
+	for buf.String() == "" {
+		time.Sleep(1 * time.Second)
+	}
 
-// 	if !cmp.Equal(want, got) {
-// 		t.Error(cmp.Diff(want, got))
-// 	}
+	got := buf.String()
 
-// }
+	want := "shellspy is running locally\n"
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
 
 func TestPortFlagStartsNetListener(t *testing.T) {
 
