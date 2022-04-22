@@ -69,8 +69,6 @@ func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
 	var flagArgs []string
 	buf := &bytes.Buffer{}
 
-	fmt.Println(len(flagArgs))
-
 	go shellspy.RunCLI(flagArgs, buf)
 
 	for buf.String() == "" {
