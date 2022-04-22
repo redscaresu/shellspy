@@ -43,13 +43,12 @@ func RunCLI(cliArgs []string, output io.Writer) {
 		os.Exit(1)
 	}
 
-	if len(cliArgs) == 1 {
+	if len(cliArgs) == 0 {
 		fmt.Fprint(s.Output, "shellspy is running locally\n")
 		s.Start()
 	}
 
 	if len(cliArgs) == 2 {
-
 		fs := flag.NewFlagSet("cmd", flag.ExitOnError)
 		portFlag := fs.Int("port", 2000, "-port 3000")
 
