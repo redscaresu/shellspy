@@ -110,27 +110,5 @@ func CreateTranscriptFile() (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return file, nil
-}
-
-func WriteTranscript(stdOut, stdErr string, cmd *exec.Cmd, file *os.File) os.File {
-
-	if _, err := file.WriteString(cmd.String()); err != nil {
-		err = fmt.Errorf("unable to write cmd to disk due to error; %w", err)
-		file.WriteString(err.Error())
-	}
-
-	file.WriteString("\n")
-
-	if stdErr != "" {
-		file.WriteString(stdErr)
-	}
-
-	if _, err := file.WriteString(stdOut); err != nil {
-		err = fmt.Errorf("unable to write stdOut to disk due to error; %w", err)
-		file.WriteString(err.Error())
-	}
-
-	return *file
 }
