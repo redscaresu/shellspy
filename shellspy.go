@@ -5,11 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"os/exec"
 	"strings"
-	"time"
 )
 
 type Session struct {
@@ -107,10 +107,10 @@ func CommandFromString(line string) *exec.Cmd {
 }
 
 func CreateTranscriptFile() (*os.File, error) {
-	now := time.Now()
-	filename := ".shellspy-" + now.Format("2006-01-02-15:04:05") + ".txt"
-	file, err := os.OpenFile(filename,
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("shellspy.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 	if err != nil {
 		return nil, err
 	}
