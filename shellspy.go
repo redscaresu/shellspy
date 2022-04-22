@@ -20,6 +20,7 @@ type Session struct {
 }
 
 func NewSession(output io.Writer) (*Session, error) {
+
 	s := &Session{}
 
 	file, err := CreateTranscriptFile()
@@ -98,6 +99,7 @@ func (s *Session) Start() {
 }
 
 func CommandFromString(line string) *exec.Cmd {
+
 	trim := strings.TrimSuffix(line, "\n")
 	name := strings.Fields(trim)
 	args := name[1:]
@@ -106,6 +108,7 @@ func CommandFromString(line string) *exec.Cmd {
 }
 
 func CreateTranscriptFile() (*os.File, error) {
+
 	file, err := os.OpenFile("shellspy.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, err
