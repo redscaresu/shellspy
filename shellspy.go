@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -109,11 +108,9 @@ func CommandFromString(line string) *exec.Cmd {
 func CreateTranscriptFile() (*os.File, error) {
 	file, err := os.OpenFile("shellspy.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err)
-	}
-	if err != nil {
 		return nil, err
 	}
+
 	return file, nil
 }
 
