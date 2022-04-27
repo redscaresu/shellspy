@@ -19,21 +19,6 @@ type Session struct {
 	Port       int
 }
 
-func NewSession(output io.Writer) (*Session, error) {
-
-	s := &Session{}
-
-	file, err := CreateTranscriptFile()
-	if err != nil {
-		return s, err
-	}
-	s.Transcript = file
-	s.Input = os.Stdin
-	s.Terminal = output
-	s.Output = io.MultiWriter(s.Terminal, s.Transcript)
-	return s, nil
-}
-
 func RunCLI(cliArgs []string, output io.Writer) {
 
 	s, err := NewSession(output)
@@ -60,6 +45,31 @@ func RunCLI(cliArgs []string, output io.Writer) {
 		}
 	}
 
+}
+
+func NewSession(output io.Writer) (*Session, error) {
+
+	s := &Session{}
+
+	file, err := CreateTranscriptFile()
+	if err != nil {
+		return s, err
+	}
+
+	s.Transcript = file
+	s.Input = os.Stdin
+	s.Terminal = output
+	s.Output = io.MultiWriter(s.Terminal, s.Transcript)
+	return s, nil
+}
+
+func CreateTranscriptFile() (*os.File, error) {
+
+	file, err := os.OpenFile("shellspy.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	return file, nil
 }
 
 func RunRemotely(s *Session) error {
@@ -89,6 +99,8 @@ func handleConn(c net.Conn, s *Session) {
 
 func (s *Session) Start() {
 
+	s.Input, s.Output = io.Pipe()
+
 	scanner := bufio.NewScanner(s.Input)
 	for scanner.Scan() {
 		cmd := CommandFromString(scanner.Text())
@@ -105,13 +117,4 @@ func CommandFromString(line string) *exec.Cmd {
 	args := name[1:]
 	cmd := exec.Command(name[0], args...)
 	return cmd
-}
-
-func CreateTranscriptFile() (*os.File, error) {
-
-	file, err := os.OpenFile("shellspy.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return nil, err
-	}
-	return file, nil
 }
