@@ -12,11 +12,12 @@ import (
 )
 
 type Session struct {
-	Input      io.Reader
-	Output     io.Writer
-	Terminal   io.Writer
-	Transcript io.Writer
-	Port       int
+	Input       io.Reader
+	Output      io.Writer
+	Terminal    io.Writer
+	Transcript  io.Writer
+	Port        int
+	InputWriter io.Writer
 }
 
 func RunCLI(cliArgs []string, output io.Writer) {
@@ -56,10 +57,11 @@ func NewSession(output io.Writer) (*Session, error) {
 		return s, err
 	}
 
+	s.InputWriter = os.Stdin
 	s.Transcript = file
 	s.Input = os.Stdin
 	s.Terminal = output
-	s.Output = io.MultiWriter(s.Terminal, s.Transcript)
+	s.Output = io.MultiWriter(s.Terminal, s.Transcript, s.InputWriter)
 	return s, nil
 }
 
@@ -99,11 +101,11 @@ func handleConn(c net.Conn, s *Session) {
 
 func (s *Session) Start() {
 
-	s.Input, s.Output = io.Pipe()
-
 	scanner := bufio.NewScanner(s.Input)
+
 	for scanner.Scan() {
 		cmd := CommandFromString(scanner.Text())
+		s.InputWriter.Write(scanner.Bytes())
 		cmd.Stdout = s.Output
 		cmd.Stderr = s.Output
 		cmd.Run()
