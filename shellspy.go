@@ -12,12 +12,11 @@ import (
 )
 
 type Session struct {
-	Input       io.Reader
-	Output      io.Writer
-	Terminal    io.Writer
-	Transcript  io.Writer
-	Port        int
-	InputWriter string
+	Input      io.Reader
+	Output     io.Writer
+	Terminal   io.Writer
+	Transcript io.Writer
+	Port       int
 }
 
 func RunCLI(cliArgs []string, output io.Writer) {
