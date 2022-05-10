@@ -17,7 +17,7 @@ type Session struct {
 	Terminal    io.Writer
 	Transcript  io.Writer
 	Port        int
-	InputWriter io.Writer
+	InputWriter string
 }
 
 func RunCLI(cliArgs []string, output io.Writer) {
@@ -57,11 +57,10 @@ func NewSession(output io.Writer) (*Session, error) {
 		return s, err
 	}
 
-	s.InputWriter = os.Stdin
 	s.Transcript = file
 	s.Input = os.Stdin
 	s.Terminal = output
-	s.Output = io.MultiWriter(s.Terminal, s.Transcript, s.InputWriter)
+	s.Output = io.MultiWriter(s.Terminal, s.Transcript)
 	return s, nil
 }
 
@@ -105,9 +104,10 @@ func (s *Session) Start() {
 
 	for scanner.Scan() {
 		cmd := CommandFromString(scanner.Text())
-		s.InputWriter.Write(scanner.Bytes())
+		input := scanner.Text() + "\n"
 		cmd.Stdout = s.Output
 		cmd.Stderr = s.Output
+		s.Transcript.Write([]byte(input))
 		cmd.Run()
 	}
 }
