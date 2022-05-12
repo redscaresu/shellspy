@@ -74,7 +74,7 @@ func CreateTranscriptFile() (*os.File, error) {
 
 func RunRemotely(s *Session) error {
 
-	fmt.Fprintf(s.Output, "shellspy is running remotely on port %d\n", s.Port)
+	fmt.Fprintf(s.Output, "shellspy is running remotely on port %d and the output file is shellspy.txt\n", s.Port)
 	address := fmt.Sprintf("localhost:%d", s.Port)
 
 	listener, err := net.Listen("tcp", address)
@@ -92,7 +92,7 @@ func RunRemotely(s *Session) error {
 
 func handleConn(c net.Conn, s *Session) {
 
-	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n")
+	fmt.Fprintf(c, "welcome to shellspy, output file is shellspy.txt"+"\n")
 	s.Input = io.Reader(c)
 	s.Start()
 }
