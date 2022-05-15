@@ -109,6 +109,9 @@ func (s *Session) Start() {
 		cmd.Stdout = s.Output
 		cmd.Stderr = s.Output
 		s.Transcript.Write([]byte(input))
+		if scanner.Text() == "exit" {
+			os.Exit(0)
+		}
 		err := cmd.Run()
 		if err != nil {
 			fmt.Println(err)
