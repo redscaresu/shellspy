@@ -2,6 +2,7 @@ package shellspy
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -100,6 +101,7 @@ func handleConn(c net.Conn, s *Session) {
 func (s *Session) Start() {
 
 	scanner := bufio.NewScanner(s.Input)
+	buf := &bytes.Buffer{}
 
 	for scanner.Scan() {
 		cmd := CommandFromString(scanner.Text())
@@ -107,7 +109,13 @@ func (s *Session) Start() {
 		cmd.Stdout = s.Output
 		cmd.Stderr = s.Output
 		s.Transcript.Write([]byte(input))
-		cmd.Run()
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println(err)
+			fmt.Fprint(buf, err)
+			bbytes := buf.Bytes()
+			s.Transcript.Write(bbytes)
+		}
 	}
 }
 
