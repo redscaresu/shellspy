@@ -98,7 +98,7 @@ func TestPortFlagStartsNetListener(t *testing.T) {
 
 	got := buf.String()
 
-	want := "shellspy is running remotely on port 6666\n"
+	want := "shellspy is running remotely on port 6666 and the output file is shellspy.txt\n"
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))

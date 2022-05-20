@@ -9,7 +9,9 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 )
 
 type Session struct {
@@ -78,24 +80,47 @@ func RunRemotely(s *Session) error {
 	fmt.Fprintf(s.Output, "shellspy is running remotely on port %d and the output file is shellspy.txt\n", s.Port)
 	address := fmt.Sprintf("localhost:%d", s.Port)
 
+	signalChanel := make(chan os.Signal, 1)
+	signal.Notify(signalChanel, syscall.SIGINT)
+
+	exit_chan := make(chan int)
+
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return err
 	}
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			return err
+
+	go func() {
+		for {
+			sc := <-signalChanel
+			switch sc {
+			// kill -SIGHUP XXXX [XXXX - PID for your program]
+			case syscall.SIGINT:
+				conn, _ := listener.Accept()
+				go handleConn(conn, s, true)
+			default:
+				conn, _ := listener.Accept()
+				go handleConn(conn, s, false)
+			}
 		}
-		go handleConn(conn, s)
-	}
+	}()
+	exitCode := <-exit_chan
+	os.Exit(exitCode)
+	return nil
 }
 
-func handleConn(c net.Conn, s *Session) {
+func handleConn(c net.Conn, s *Session, terminate bool) {
 
-	fmt.Fprintf(c, "welcome to shellspy, output file is shellspy.txt"+"\n")
-	s.Input = io.Reader(c)
-	s.Start()
+	if !terminate {
+		fmt.Fprintf(c, "welcome to shellspy, output file is shellspy.txt"+"\n")
+		s.Input = io.Reader(c)
+		s.Start()
+	} else {
+		fmt.Fprintf(c, "Server has terminated this process"+"\n")
+		s.Input = io.Reader(c)
+		os.Exit(1)
+		s.Start()
+	}
 }
 
 func (s *Session) Start() {
