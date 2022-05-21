@@ -94,13 +94,14 @@ func RunRemotely(s *Session) error {
 		for {
 			sc := <-signalChanel
 			switch sc {
-			// kill -SIGHUP XXXX [XXXX - PID for your program]
 			case syscall.SIGINT:
 				conn, _ := listener.Accept()
 				go handleConn(conn, s, true)
+				exit_chan <- 0
 			default:
 				conn, _ := listener.Accept()
 				go handleConn(conn, s, false)
+				exit_chan <- 0
 			}
 		}
 	}()
