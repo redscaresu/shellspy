@@ -1,8 +1,11 @@
 package shellspy_test
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"io"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -89,22 +92,28 @@ func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
 	}
 }
 
-func TestPortFlagStartsNetListener(t *testing.T) {
+func TestPortFlagListensOnPort(t *testing.T) {
 	t.Parallel()
-
-	buf := &bytes.Buffer{}
 
 	flagArgs := []string{"-port", "6666"}
 
-	go shellspy.RunCLI(flagArgs, buf)
+	go shellspy.RunCLI(flagArgs, io.Discard)
 
-	for buf.String() == "" {
-		time.Sleep(1 * time.Second)
+	conn, err := net.Dial("tcp", "127.0.0.1:6666")
+	for err != nil {
+		t.Log("retrying network connection")
+		time.Sleep(10 * time.Millisecond)
+		conn, err = net.Dial("tcp", "127.0.0.1:6666")
 	}
 
-	got := buf.String()
+	scanner := bufio.NewScanner(conn)
+	if !scanner.Scan() {
+		t.Fatal("nothing has been returned by the scanner")
+	}
 
-	want := "shellspy is running remotely on port 6666 and the output file is shellspy.txt\n"
+	got := scanner.Text()
+
+	want := "hello, welcome to shellspy"
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))

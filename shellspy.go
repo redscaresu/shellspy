@@ -94,7 +94,7 @@ func RunRemotely(s *Session) error {
 func handleConn(c net.Conn, s *Session) {
 
 	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n")
-	s.Input = io.Reader(c)
+	s.Input = c
 	s.Start()
 }
 
