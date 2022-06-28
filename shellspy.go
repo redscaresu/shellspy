@@ -25,7 +25,7 @@ func RunCLI(cliArgs []string, output io.Writer) {
 	s, err := NewSession(output)
 
 	if err != nil {
-		fmt.Printf("%v", err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -53,7 +53,7 @@ func NewSession(output io.Writer) (*Session, error) {
 
 	file, err := CreateTranscriptFile()
 	if err != nil {
-		return s, err
+		return nil, err
 	}
 
 	s.Transcript = file
@@ -83,7 +83,10 @@ func RunRemotely(s *Session) error {
 	}
 
 	for {
-		conn, _ := listener.Accept()
+		conn, err := listener.Accept()
+		if err != nil {
+			return err
+		}
 		handleConn(conn, s)
 	}
 }
