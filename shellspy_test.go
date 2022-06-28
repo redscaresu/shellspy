@@ -14,6 +14,7 @@ import (
 )
 
 func TestCommandFromString(t *testing.T) {
+	t.Parallel()
 
 	cmdWant := &exec.Cmd{}
 	cmdWant.Args = []string{"/bin/echo", "hello", "world"}
@@ -26,6 +27,8 @@ func TestCommandFromString(t *testing.T) {
 	}
 }
 func TestCommandFromStringArgs(t *testing.T) {
+	t.Parallel()
+
 	input := "ls"
 	want := []string{"ls"}
 	got := shellspy.CommandFromString(input).Args
@@ -35,6 +38,7 @@ func TestCommandFromStringArgs(t *testing.T) {
 }
 
 func TestRunCommand(t *testing.T) {
+	t.Parallel()
 
 	wantBuf := &bytes.Buffer{}
 	gotBuf := &bytes.Buffer{}
@@ -65,6 +69,7 @@ func TestRunCommand(t *testing.T) {
 }
 
 func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
+	t.Parallel()
 
 	var flagArgs []string
 	buf := &bytes.Buffer{}
@@ -85,6 +90,7 @@ func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
 }
 
 func TestPortFlagStartsNetListener(t *testing.T) {
+	t.Parallel()
 
 	buf := &bytes.Buffer{}
 
