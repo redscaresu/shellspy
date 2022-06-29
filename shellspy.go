@@ -2,7 +2,6 @@ package shellspy
 
 import (
 	"bufio"
-	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -101,23 +100,20 @@ func handleConn(c net.Conn, s *Session) {
 func (s *Session) Start() {
 
 	scanner := bufio.NewScanner(s.Input)
-	buf := &bytes.Buffer{}
 
 	for scanner.Scan() {
 		cmd := CommandFromString(scanner.Text())
 		input := scanner.Text() + "\n"
 		cmd.Stdout = s.Output
 		cmd.Stderr = s.Output
-		s.Transcript.Write([]byte(input))
+		fmt.Fprint(s.Transcript, input)
 		if scanner.Text() == "exit" {
 			os.Exit(0)
 		}
 		err := cmd.Run()
 		if err != nil {
-			fmt.Println(err)
-			fmt.Fprint(buf, err)
-			bbytes := buf.Bytes()
-			s.Transcript.Write(bbytes)
+			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprint(s.Transcript, err)
 		}
 	}
 }
