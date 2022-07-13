@@ -2,6 +2,7 @@ package shellspy
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -92,9 +93,17 @@ func RunRemotely(s *Session) error {
 
 func handleConn(c net.Conn, s *Session) {
 
+	userOutput := make(chan io.Writer)
+
+	buf := &bytes.Buffer{}
 	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n")
 	s.Input = c
-	s.Start()
+	go s.Start()
+	userOutput <- s.Output
+	for output := range userOutput {
+		fmt.Fprint(buf, output)
+		fmt.Println(buf.String())
+	}
 }
 
 func (s *Session) Start() {
