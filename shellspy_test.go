@@ -1,20 +1,23 @@
 package shellspy_test
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"io"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/redscaresu/shellspy"
-
 	"github.com/google/go-cmp/cmp"
+	"github.com/redscaresu/shellspy"
 )
 
 func TestCommandFromString(t *testing.T) {
+	t.Parallel()
 
 	cmdWant := &exec.Cmd{}
 	cmdWant.Args = []string{"/bin/echo", "hello", "world"}
@@ -26,37 +29,27 @@ func TestCommandFromString(t *testing.T) {
 		t.Error(cmp.Diff(want, got))
 	}
 }
+func TestCommandFromStringArgs(t *testing.T) {
+	t.Parallel()
 
-func TestRunCommand(t *testing.T) {
-
-	cmd := exec.Command("echo", "hello world")
-	want := "hello world\n"
-	got, _ := shellspy.RunFromCmd(cmd)
-
+	input := "ls"
+	want := []string{"ls"}
+	got := shellspy.CommandFromString(input).Args
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
-
-	cmd = exec.Command("pwd", "-x")
-	want = "pwd: illegal option -- x\nusage: pwd [-L | -P]\n"
-
-	_, got = shellspy.RunFromCmd(cmd)
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-
 }
 
-func TestWriteShellScript(t *testing.T) {
+func TestRunCommand(t *testing.T) {
+	t.Parallel()
 
 	wantBuf := &bytes.Buffer{}
 	gotBuf := &bytes.Buffer{}
-	wantBuf.WriteString("hello world\n")
-	session, _ := shellspy.NewSession(
-		shellspy.WithTranscriptOutput(wantBuf),
-	)
-
-	session.Input = strings.NewReader("echo hello world")
+	s, err := shellspy.NewSession(gotBuf)
+	s.Input = strings.NewReader("echo hello world")
+	if err != nil {
+		t.Fatal("unable to create file")
+	}
 	tempDir := t.TempDir()
 
 	now := time.Now()
@@ -66,13 +59,12 @@ func TestWriteShellScript(t *testing.T) {
 	if err != nil {
 		t.Fatal("unable to create file")
 	}
+	s.Transcript = file
 
-	session.File = file
-	session.Run()
-	fmt.Fprint(gotBuf, session.TranscriptOutput)
-
+	s.Start()
+	fmt.Fprint(wantBuf, s.Terminal)
 	want := wantBuf.String()
-	got := gotBuf.String()
+	got := "hello world\n"
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
@@ -80,12 +72,17 @@ func TestWriteShellScript(t *testing.T) {
 }
 
 func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
+	t.Parallel()
 
+	var flagArgs []string
 	buf := &bytes.Buffer{}
 
-	flagArgs := []string{"/var/folders/1v/4mmgcg8s51362djr4g9s9sfw0000gn/T/go-build3590226918/b001/exe/main"}
+	go shellspy.RunCLI(flagArgs, buf)
 
-	shellspy.RunCLI(flagArgs, buf)
+	for buf.String() == "" {
+		time.Sleep(1 * time.Second)
+	}
+
 	got := buf.String()
 
 	want := "shellspy is running locally\n"
@@ -93,11 +90,32 @@ func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
-
 }
 
-// func TestPortFlagStartsNetListener(t *testing.T) {
+func TestPortFlagListensOnPort(t *testing.T) {
+	t.Parallel()
 
-// 	flagArgs := []string{"port", "9999"}
-// 	shellspy.RunCLI(flagArgs)
-// }
+	flagArgs := []string{"-port", "6666"}
+
+	go shellspy.RunCLI(flagArgs, io.Discard)
+
+	conn, err := net.Dial("tcp", "127.0.0.1:6666")
+	for err != nil {
+		t.Log("retrying network connection")
+		time.Sleep(10 * time.Millisecond)
+		conn, err = net.Dial("tcp", "127.0.0.1:6666")
+	}
+
+	scanner := bufio.NewScanner(conn)
+	if !scanner.Scan() {
+		t.Fatal("nothing has been returned by the scanner")
+	}
+
+	got := scanner.Text()
+
+	want := "hello, welcome to shellspy"
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}

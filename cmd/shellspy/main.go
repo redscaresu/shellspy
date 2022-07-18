@@ -8,6 +8,5 @@ import (
 
 func main() {
 
-	cliArgs := os.Args
-	shellspy.RunCLI(cliArgs, os.Stdout)
+	shellspy.RunCLI(os.Args[1:], os.Stdout)
 }
