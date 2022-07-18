@@ -2,14 +2,15 @@ package shellspy
 
 import (
 	"bufio"
-	"bytes"
 	"flag"
 	"fmt"
 	"io"
 	"net"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 )
 
 type Session struct {
@@ -83,33 +84,37 @@ func RunRemotely(s *Session) error {
 	}
 
 	for {
+
+		killSignal := make(chan os.Signal, 1)
+		signal.Notify(killSignal, syscall.SIGINT, syscall.SIGTERM)
+
 		conn, err := listener.Accept()
 		if err != nil {
 			return err
 		}
-		handleConn(conn, s)
+
+		go func() {
+			<-killSignal
+			fmt.Fprintf(conn, "connection closed on the server, goodbye"+"\n")
+			conn.Close()
+			os.Exit(0)
+		}()
+
+		go handleConn(conn, s)
+
 	}
 }
 
 func handleConn(c net.Conn, s *Session) {
 
-	userOutput := make(chan io.Writer)
-
-	buf := &bytes.Buffer{}
 	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n")
 	s.Input = c
 	go s.Start()
-	userOutput <- s.Output
-	for output := range userOutput {
-		fmt.Fprint(buf, output)
-		fmt.Println(buf.String())
-	}
 }
 
 func (s *Session) Start() {
 
 	scanner := bufio.NewScanner(s.Input)
-
 	for scanner.Scan() {
 		cmd := CommandFromString(scanner.Text())
 		input := scanner.Text() + "\n"
