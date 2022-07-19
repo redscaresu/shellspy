@@ -19,6 +19,7 @@ type Session struct {
 	Terminal   io.Writer
 	Transcript io.Writer
 	Port       int
+	C          net.Conn
 }
 
 func RunCLI(cliArgs []string, output io.Writer) {
@@ -31,7 +32,7 @@ func RunCLI(cliArgs []string, output io.Writer) {
 	}
 
 	if len(cliArgs) == 0 {
-		fmt.Fprint(s.Output, "shellspy is running locally\n")
+		fmt.Fprint(s.Output, "\n")
 		s.Start()
 	}
 
@@ -107,14 +108,16 @@ func RunRemotely(s *Session) error {
 
 func handleConn(c net.Conn, s *Session) {
 
-	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n")
+	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n"+"$ ")
 	s.Input = c
-	go s.Start()
+	s.C = c
+	s.Start()
 }
 
 func (s *Session) Start() {
 
 	scanner := bufio.NewScanner(s.Input)
+
 	for scanner.Scan() {
 		cmd := CommandFromString(scanner.Text())
 		input := scanner.Text() + "\n"
@@ -129,6 +132,7 @@ func (s *Session) Start() {
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprint(s.Transcript, err)
 		}
+		fmt.Fprintf(s.C, "$ ")
 	}
 }
 
