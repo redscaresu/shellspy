@@ -25,3 +25,7 @@ OR
 > go run cmd/main.go --mode local
 shellspy is running locally
 ```
+
+TODO
+- per session readmefile
+- authentication

@@ -3,7 +3,6 @@ package shellspy_test
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"net"
 	"os"
@@ -43,7 +42,6 @@ func TestCommandFromStringArgs(t *testing.T) {
 func TestRunCommand(t *testing.T) {
 	t.Parallel()
 
-	wantBuf := &bytes.Buffer{}
 	gotBuf := &bytes.Buffer{}
 	s, err := shellspy.NewSession(gotBuf)
 	s.Input = strings.NewReader("echo hello world")
@@ -62,9 +60,9 @@ func TestRunCommand(t *testing.T) {
 	s.Transcript = file
 
 	s.Start()
-	fmt.Fprint(wantBuf, s.Terminal)
-	want := wantBuf.String()
-	got := "hello world\n"
+	// fmt.Fprint(wantBuf, s.Terminal)
+	got := gotBuf.String()
+	want := "welcome to shellspy\n$ hello world\n$ "
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
@@ -80,12 +78,12 @@ func TestRunWithoutPortFlagRunInteractively(t *testing.T) {
 	go shellspy.RunCLI(flagArgs, buf)
 
 	for buf.String() == "" {
-		time.Sleep(1 * time.Second)
+		time.Sleep(5 * time.Millisecond)
 	}
 
 	got := buf.String()
 
-	want := "shellspy is running locally\n"
+	want := "welcome to shellspy\n$ "
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
@@ -113,7 +111,7 @@ func TestPortFlagListensOnPort(t *testing.T) {
 
 	got := scanner.Text()
 
-	want := "hello, welcome to shellspy"
+	want := "welcome to shellspy"
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))

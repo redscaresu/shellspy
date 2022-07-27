@@ -18,22 +18,17 @@ type Session struct {
 	Output     io.Writer
 	Terminal   io.Writer
 	Transcript io.Writer
-	Port       int
-	C          net.Conn
+}
+
+type Server struct {
+	Port int
+	C    net.Conn
 }
 
 func RunCLI(cliArgs []string, output io.Writer) {
 
-	s, err := NewSession(output)
-
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-
 	if len(cliArgs) == 0 {
-		fmt.Fprint(s.Output, "\n")
-		s.Start()
+		RunLocally(output)
 	}
 
 	if len(cliArgs) == 2 {
@@ -43,8 +38,7 @@ func RunCLI(cliArgs []string, output io.Writer) {
 		fs.Parse(cliArgs)
 
 		if portFlag != nil {
-			s.Port = *portFlag
-			RunRemotely(s)
+			RunRemotely(*portFlag)
 		}
 	}
 }
@@ -74,10 +68,10 @@ func CreateTranscriptFile() (*os.File, error) {
 	return file, nil
 }
 
-func RunRemotely(s *Session) error {
+func RunRemotely(port int) error {
 
-	fmt.Fprintf(s.Output, "shellspy is running remotely on port %d and the output file is shellspy.txt\n", s.Port)
-	address := fmt.Sprintf("localhost:%d", s.Port)
+	fmt.Printf("shellspy is running remotely on port %v and the output file is shellspy.txt\n", port)
+	address := fmt.Sprintf("localhost:%d", port)
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
@@ -89,33 +83,47 @@ func RunRemotely(s *Session) error {
 		killSignal := make(chan os.Signal, 1)
 		signal.Notify(killSignal, syscall.SIGINT, syscall.SIGTERM)
 
+		go func() {
+			<-killSignal
+			os.Exit(0)
+		}()
+
 		conn, err := listener.Accept()
 		if err != nil {
 			return err
 		}
 
-		go func() {
-			<-killSignal
-			fmt.Fprintf(conn, "connection closed on the server, goodbye"+"\n")
-			conn.Close()
-			os.Exit(0)
-		}()
-
-		go handleConn(conn, s)
+		go handleConn(conn)
 
 	}
 }
 
-func handleConn(c net.Conn, s *Session) {
+func handleConn(c net.Conn) {
+	s, err := NewSession(c)
+	if err != nil {
+		fmt.Fprint(c, err)
+		c.Close()
+		fmt.Printf("connection is closed due to: %v", err)
+	}
 
-	fmt.Fprintf(c, "hello, welcome to shellspy"+"\n"+"$ ")
+	fmt.Printf("new connection established %s and the file is shellspy.txt ", c.RemoteAddr())
 	s.Input = c
-	s.C = c
+	s.Start()
+}
+
+func RunLocally(output io.Writer) {
+	s, err := NewSession(output)
+	if err != nil {
+		fmt.Println("cannot create transcript file")
+		os.Exit(1)
+	}
 	s.Start()
 }
 
 func (s *Session) Start() {
 
+	fmt.Fprintln(s.Output, "welcome to shellspy")
+	fmt.Fprintf(s.Output, "$ ")
 	scanner := bufio.NewScanner(s.Input)
 
 	for scanner.Scan() {
@@ -129,10 +137,9 @@ func (s *Session) Start() {
 		}
 		err := cmd.Run()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			fmt.Fprint(s.Transcript, err)
+			fmt.Fprint(s.Output, err)
 		}
-		fmt.Fprintf(s.C, "$ ")
+		fmt.Fprintf(s.Output, "$ ")
 	}
 }
 
